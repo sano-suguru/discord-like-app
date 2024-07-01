@@ -6,6 +6,7 @@ interface Message {
     user: string;
     content: string;
     timestamp: Date;
+    isEdited?: boolean;
 }
 
 interface ChatState {
@@ -13,6 +14,8 @@ interface ChatState {
     currentChannel: string | null;
     webSocket: MockWebSocket | null;
     addMessage: (channelId: string, message: Message) => void;
+    editMessage: (channelId: string, messageId: string, newContent: string) => void;
+    deleteMessage: (channelId: string, messageId: string) => void;
     setCurrentChannel: (channelId: string) => void;
     sendMessage: (content: string) => void;
 }
@@ -26,6 +29,24 @@ export const useChatStore = create<ChatState>((set, get) => ({
             messages: {
                 ...state.messages,
                 [channelId]: [...(state.messages[channelId] || []), message],
+            },
+        })),
+    editMessage: (channelId, messageId, newContent) =>
+        set(state => ({
+            messages: {
+                ...state.messages,
+                [channelId]: state.messages[channelId].map(msg =>
+                    msg.id === messageId
+                        ? { ...msg, content: newContent, isEdited: true }
+                        : msg
+                ),
+            },
+        })),
+    deleteMessage: (channelId, messageId) =>
+        set(state => ({
+            messages: {
+                ...state.messages,
+                [channelId]: state.messages[channelId].filter(msg => msg.id !== messageId),
             },
         })),
     setCurrentChannel: (channelId) => {
