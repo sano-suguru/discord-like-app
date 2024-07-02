@@ -9,7 +9,7 @@ export interface Message {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const sendMessage = async (channelId: string, content: string): Promise<Message> => {
+export const sendMessage = async (_channelId: string, content: string): Promise<Message> => {
     await delay(500); // Simulate network delay
     return {
         id: uuidv4(),
