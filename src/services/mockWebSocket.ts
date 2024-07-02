@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Message } from '../types/message';
 
-type MessageCallback = (message: { id: string; user: string; content: string; timestamp: Date }) => void;
+type MessageCallback = (message: Message) => void;
 
 class MockWebSocket {
     private callbacks: MessageCallback[] = [];
@@ -31,7 +32,7 @@ class MockWebSocket {
         this.interval = window.setInterval(() => {
             const mockedMessage = {
                 id: uuidv4(),
-                user: this.getRandomUser(),
+                username: this.getRandomUser(),
                 content: this.getRandomLoremIpsum(),
                 timestamp: new Date(),
             };

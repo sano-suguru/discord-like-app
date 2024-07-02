@@ -1,20 +1,12 @@
-import { v4 as uuidv4 } from 'uuid';
 
-export interface Message {
-    id: string;
-    user: string;
-    content: string;
-    timestamp: Date;
-}
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export const sendMessage = async (_channelId: string, content: string): Promise<Message> => {
-    await delay(500); // Simulate network delay
-    return {
-        id: uuidv4(),
-        user: 'Current User',
-        content,
-        timestamp: new Date(),
-    };
+export const login = async (username: string, password: string) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (username === 'user' && password === 'password') {
+                resolve({ token: 'fake-token' });
+            } else {
+                reject(new Error('Invalid credentials'));
+            }
+        }, 1000);
+    });
 };

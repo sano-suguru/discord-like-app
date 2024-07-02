@@ -1,22 +1,24 @@
 import { create } from 'zustand';
+import { login as mockLogin } from '../api/mockApi';
 
 interface AuthState {
-    user: { id: string; username: string } | null;
     isAuthenticated: boolean;
-    login: (username: string, password: string) => Promise<void>;
+    username: string | null;
+    login: (username: string, password: string) => void;
     logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-    user: null,
     isAuthenticated: false,
-    login: async (username, password) => {
-        // モックのログイン処理
-        if (username === 'user' && password === 'password') {
-            set({ user: { id: '1', username }, isAuthenticated: true });
-        } else {
-            throw new Error('Invalid credentials');
+    username: null,
+    login: async (username: string, password: string) => {
+        try {
+            const response = await mockLogin(username, password);
+            set({ isAuthenticated: true, username: username }); // ログイン時にユーザー名を保存
+            console.log('Login successful:', response);
+        } catch (error) {
+            console.error('Login failed:', error);
         }
     },
-    logout: () => set({ user: null, isAuthenticated: false }),
+    logout: () => set({ isAuthenticated: false, username: null }), // ログアウト時にユーザー名をリセット
 }));
