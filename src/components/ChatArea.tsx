@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Button, HStack, Input, VStack, Text, IconButton, Link } from '@chakra-ui/react';
-import { EditIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
+import { Box, Button, HStack, Input, VStack, Text, IconButton } from '@chakra-ui/react';
+import { DeleteIcon } from '@chakra-ui/icons';
 import { useChatStore } from '../store/chatStore';
 import { useAuthStore } from '../store/authStore'; // 追加
 import EditMessageForm from './EditMessageForm';
 import { FileAttachment } from '../types/fileAttachment';
 import FileUploadButton from './FileUploadButton';
+import MessageItem from './MessageItem';
+import { Message } from '../types/message';
 
 interface ChatAreaProps {
     channelId: string;
@@ -64,8 +66,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
         <Box flex={1} p={4}>
             <VStack spacing={4} align="stretch" h="calc(100vh - 100px)">
                 <Box flex={1} overflowY="auto">
-                    {messages[channelId]?.map((message) => (
-                        <Box key={message.id} mb={2}>
+                    {messages[channelId]?.map((message: Message) => (
+                        <Box key={message.id}>
                             {editingMessageId === message.id ? (
                                 <EditMessageForm
                                     initialContent={message.content}
@@ -73,37 +75,12 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
                                     onCancel={() => setEditingMessageId(null)}
                                 />
                             ) : (
-                                <VStack align="start">
-                                    <HStack>
-                                        <Text fontWeight="bold">{message.username}:</Text>
-                                        <Text>{message.content}</Text>
-                                        {message.isEdited && <Text fontSize="xs">(edited)</Text>}
-                                        {message.username === username && (
-                                            <>
-                                                <IconButton
-                                                    aria-label="Edit message"
-                                                    icon={<EditIcon />}
-                                                    size="xs"
-                                                    onClick={() => setEditingMessageId(message.id)}
-                                                />
-                                                <IconButton
-                                                    aria-label="Delete message"
-                                                    icon={<DeleteIcon />}
-                                                    size="xs"
-                                                    onClick={() => handleDelete(channelId, message.id)}
-                                                />
-                                            </>
-                                        )}
-                                    </HStack>
-                                    {message.attachment && (
-                                        <HStack>
-                                            <DownloadIcon />
-                                            <Link href={message.attachment.url} isExternal>
-                                                {message.attachment.name}
-                                            </Link>
-                                        </HStack>
-                                    )}
-                                </VStack>
+                                <MessageItem
+                                    message={message}
+                                    isOwnMessage={message.username === username}
+                                    onEdit={(messageId) => setEditingMessageId(messageId)}
+                                    onDelete={(messageId) => handleDelete(channelId, messageId)}
+                                />
                             )}
                         </Box>
                     ))}

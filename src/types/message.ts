@@ -8,3 +8,4 @@ export interface Message {
     isEdited?: boolean;
     attachment?: FileAttachment;
 }
+
