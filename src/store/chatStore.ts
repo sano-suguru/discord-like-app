@@ -12,6 +12,9 @@ interface ChatState {
     deleteMessage: (channelId: string, messageId: string) => void;
     setCurrentChannel: (channelId: string) => void;
     sendMessage: (content: string, username: string, attachment?: FileAttachment) => void;
+    addReaction: (channelId: string, messageId: string, emoji: string, username: string) => void;
+    removeReaction: (channelId: string, messageId: string, emoji: string, username: string) => void;
+
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -91,9 +94,66 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 content,
                 timestamp: new Date(),
                 attachment,
+                reactions: {}
             });
         } else {
             console.error('Cannot send message: No active channel or WebSocket connection');
         }
     },
+    addReaction: (channelId, messageId, emoji, username) =>
+        set((state) => {
+            const updatedMessages = state.messages[channelId].map((msg) => {
+                if (msg.id === messageId) {
+                    const updatedReactions = { ...msg.reactions };
+                    if (updatedReactions[emoji]) {
+                        updatedReactions[emoji] = {
+                            ...updatedReactions[emoji],
+                            count: updatedReactions[emoji].count + 1,
+                            users: [...updatedReactions[emoji].users, username],
+                        };
+                    } else {
+                        updatedReactions[emoji] = { emoji, count: 1, users: [username] };
+                    }
+                    return { ...msg, reactions: updatedReactions };
+                }
+                return msg;
+            });
+
+            return {
+                messages: {
+                    ...state.messages,
+                    [channelId]: updatedMessages,
+                },
+            };
+        }),
+
+    removeReaction: (channelId, messageId, emoji, username) =>
+        set((state) => {
+            const updatedMessages = state.messages[channelId].map((msg) => {
+                if (msg.id === messageId && msg.reactions[emoji]) {
+                    const updatedReaction = {
+                        ...msg.reactions[emoji],
+                        count: msg.reactions[emoji].count - 1,
+                        users: msg.reactions[emoji].users.filter((user) => user !== username),
+                    };
+
+                    const updatedReactions = { ...msg.reactions };
+                    if (updatedReaction.count === 0) {
+                        delete updatedReactions[emoji];
+                    } else {
+                        updatedReactions[emoji] = updatedReaction;
+                    }
+
+                    return { ...msg, reactions: updatedReactions };
+                }
+                return msg;
+            });
+
+            return {
+                messages: {
+                    ...state.messages,
+                    [channelId]: updatedMessages,
+                },
+            };
+        }),
 }));

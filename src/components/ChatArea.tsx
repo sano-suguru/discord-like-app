@@ -14,7 +14,7 @@ interface ChatAreaProps {
 }
 
 const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
-    const { messages, setCurrentChannel, sendMessage, editMessage, deleteMessage } = useChatStore();
+    const { messages, setCurrentChannel, sendMessage, editMessage, deleteMessage, addReaction, removeReaction } = useChatStore();
     const { username } = useAuthStore(); // 追加
     const [newMessage, setNewMessage] = useState('');
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -75,11 +75,14 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
                                     onCancel={() => setEditingMessageId(null)}
                                 />
                             ) : (
-                                <MessageItem
+                                username && <MessageItem
                                     message={message}
                                     isOwnMessage={message.username === username}
+                                    currentUsername={username}
                                     onEdit={(messageId) => setEditingMessageId(messageId)}
                                     onDelete={(messageId) => handleDelete(channelId, messageId)}
+                                    onAddReaction={(messageId, emoji) => addReaction(channelId, messageId, emoji, username)}
+                                    onRemoveReaction={(messageId, emoji) => removeReaction(channelId, messageId, emoji, username)}
                                 />
                             )}
                         </Box>

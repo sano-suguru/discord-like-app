@@ -1,4 +1,5 @@
 import { FileAttachment } from "./fileAttachment";
+import { Reaction } from "./reaction";
 
 export interface Message {
     id: string;
@@ -7,5 +8,6 @@ export interface Message {
     timestamp: Date;
     isEdited?: boolean;
     attachment?: FileAttachment;
+    reactions: { [emoji: string]: Reaction };
 }
 
