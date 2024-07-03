@@ -35,6 +35,7 @@ class MockWebSocket {
                 username: this.getRandomUser(),
                 content: this.getRandomLoremIpsum(),
                 timestamp: new Date(),
+                reactions: {}
             };
             this.callbacks.forEach(callback => callback(mockedMessage));
         }, 5000);
