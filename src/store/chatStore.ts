@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import MockWebSocket from '../services/mockWebSocket';
 import { Message } from '../types/message';
+import { FileAttachment } from '../types/fileAttachment';
 
 interface ChatState {
     messages: { [channelId: string]: Message[] };
@@ -10,7 +11,7 @@ interface ChatState {
     editMessage: (channelId: string, messageId: string, newContent: string) => void;
     deleteMessage: (channelId: string, messageId: string) => void;
     setCurrentChannel: (channelId: string) => void;
-    sendMessage: (content: string, username: string) => void;
+    sendMessage: (content: string, username: string, attachment?: FileAttachment) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -80,16 +81,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
         console.log(`Switched to channel: ${channelId}`); // デバッグ用
     },
-    sendMessage: (content, username) => {
+    sendMessage: (content, username, attachment) => {
         const { currentChannel, webSocket } = get();
         if (currentChannel && webSocket) {
             webSocket.sendMessage(content);
-            // 即時に自分のメッセージを追加
             get().addMessage(currentChannel, {
                 id: Date.now().toString(),
                 username: username,
                 content,
                 timestamp: new Date(),
+                attachment,
             });
         } else {
             console.error('Cannot send message: No active channel or WebSocket connection');

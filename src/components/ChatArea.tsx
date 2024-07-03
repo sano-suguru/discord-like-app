@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Button, HStack, Input, VStack, Text, IconButton } from '@chakra-ui/react';
-import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
+import { Box, Button, HStack, Input, VStack, Text, IconButton, Link } from '@chakra-ui/react';
+import { EditIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
 import { useChatStore } from '../store/chatStore';
 import { useAuthStore } from '../store/authStore'; // 追加
 import EditMessageForm from './EditMessageForm';
+import { FileAttachment } from '../types/fileAttachment';
+import FileUploadButton from './FileUploadButton';
 
 interface ChatAreaProps {
     channelId: string;
@@ -26,10 +28,24 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages[channelId]]);
 
+    const [attachment, setAttachment] = useState<FileAttachment | null>(null);
+
+    const handleFileSelect = async (file: File) => {
+        // 実際のアプリケーションでは、ここでファイルをサーバーにアップロードし、URLを取得します
+        // この例では、ローカルの URL を生成しています
+        const url = URL.createObjectURL(file);
+        setAttachment({
+            name: file.name,
+            url: url,
+            type: file.type,
+        });
+    };
+
     const handleSend = () => {
-        if (newMessage.trim() && username) {
-            sendMessage(newMessage, username);
+        if ((newMessage.trim() || attachment) && username) {
+            sendMessage(newMessage, username, attachment || undefined);
             setNewMessage('');
+            setAttachment(null);
         }
     };
 
@@ -57,27 +73,37 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
                                     onCancel={() => setEditingMessageId(null)}
                                 />
                             ) : (
-                                <HStack>
-                                    <Text fontWeight="bold">{message.username}:</Text>
-                                    <Text>{message.content}</Text>
-                                    {message.isEdited && <Text fontSize="xs">(edited)</Text>}
-                                    {message.username === username && ( // 追加
-                                        <>
-                                            <IconButton
-                                                aria-label="Edit message"
-                                                icon={<EditIcon />}
-                                                size="xs"
-                                                onClick={() => setEditingMessageId(message.id)}
-                                            />
-                                            <IconButton
-                                                aria-label="Delete message"
-                                                icon={<DeleteIcon />}
-                                                size="xs"
-                                                onClick={() => handleDelete(channelId, message.id)}
-                                            />
-                                        </>
+                                <VStack align="start">
+                                    <HStack>
+                                        <Text fontWeight="bold">{message.username}:</Text>
+                                        <Text>{message.content}</Text>
+                                        {message.isEdited && <Text fontSize="xs">(edited)</Text>}
+                                        {message.username === username && (
+                                            <>
+                                                <IconButton
+                                                    aria-label="Edit message"
+                                                    icon={<EditIcon />}
+                                                    size="xs"
+                                                    onClick={() => setEditingMessageId(message.id)}
+                                                />
+                                                <IconButton
+                                                    aria-label="Delete message"
+                                                    icon={<DeleteIcon />}
+                                                    size="xs"
+                                                    onClick={() => handleDelete(channelId, message.id)}
+                                                />
+                                            </>
+                                        )}
+                                    </HStack>
+                                    {message.attachment && (
+                                        <HStack>
+                                            <DownloadIcon />
+                                            <Link href={message.attachment.url} isExternal>
+                                                {message.attachment.name}
+                                            </Link>
+                                        </HStack>
                                     )}
-                                </HStack>
+                                </VStack>
                             )}
                         </Box>
                     ))}
@@ -94,8 +120,20 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
                             }
                         }}
                     />
+                    <FileUploadButton onFileSelect={handleFileSelect} />
                     <Button onClick={handleSend}>Send</Button>
                 </HStack>
+                {attachment && (
+                    <Text fontSize="sm">
+                        Attached: {attachment.name}{' '}
+                        <IconButton
+                            aria-label="Remove attachment"
+                            icon={<DeleteIcon />}
+                            size="xs"
+                            onClick={() => setAttachment(null)}
+                        />
+                    </Text>
+                )}
             </VStack>
         </Box>
     );
