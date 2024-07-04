@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, VStack, Button, Text } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../stores/authStore';
 
 const Sidebar: React.FC = () => {
     const channels = ['general', 'random', 'help'];
-    const logout = useAuthStore((state) => state.logout);
+    const { logout } = useAuthStore();
     const navigate = useNavigate();
 
     const handleLogout = () => {

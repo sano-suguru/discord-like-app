@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Button, HStack, Input, VStack, Text, IconButton } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
-import { useChatStore } from '../store/chatStore';
-import { useAuthStore } from '../store/authStore'; // 追加
+import { useChatStore } from '../stores/chatStore';
+import { useAuthStore } from '../stores/authStore'; // 追加
 import EditMessageForm from './EditMessageForm';
 import { FileAttachment } from '../types/fileAttachment';
 import FileUploadButton from './FileUploadButton';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, FormControl, FormLabel, Input, VStack, Text } from '@chakra-ui/react';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 
 const LoginForm: React.FC = () => {

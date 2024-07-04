@@ -1,12 +1,14 @@
+import { delay } from "../util/delay";
 
 export const login = async (username: string, password: string) => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (username === 'user' && password === 'password') {
-                resolve({ token: 'fake-token' });
-            } else {
-                reject(new Error('Invalid credentials'));
-            }
-        }, 1000);
-    });
+    await delay(500);
+    if (username === 'user' && password === 'password') {
+        return ({ token: 'fake-token' });
+    } else {
+        throw new Error('Invalid credentials');
+    }
 };
+
+export const logout = async () => {
+    await delay(500);
+}
