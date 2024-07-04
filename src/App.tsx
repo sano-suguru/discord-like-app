@@ -17,6 +17,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginForm />} />
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
+            <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:channelId" element={<Chat />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>

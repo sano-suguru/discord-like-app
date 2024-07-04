@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Box, Button, HStack, Input, VStack, Text, IconButton } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { useChatStore } from '../stores/chatStore';
-import { useAuthStore } from '../stores/authStore'; // 追加
+import { useAuthStore } from '../stores/authStore';
 import EditMessageForm from './EditMessageForm';
 import { FileAttachment } from '../types/fileAttachment';
 import FileUploadButton from './FileUploadButton';
@@ -15,7 +15,7 @@ interface ChatAreaProps {
 
 const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
     const { messages, setCurrentChannel, sendMessage, editMessage, deleteMessage, addReaction, removeReaction } = useChatStore();
-    const { username } = useAuthStore(); // 追加
+    const { user } = useAuthStore();
     const [newMessage, setNewMessage] = useState('');
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -33,8 +33,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
     const [attachment, setAttachment] = useState<FileAttachment | null>(null);
 
     const handleFileSelect = async (file: File) => {
-        // 実際のアプリケーションでは、ここでファイルをサーバーにアップロードし、URLを取得します
-        // この例では、ローカルの URL を生成しています
         const url = URL.createObjectURL(file);
         setAttachment({
             name: file.name,
@@ -44,8 +42,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
     };
 
     const handleSend = () => {
-        if ((newMessage.trim() || attachment) && username) {
-            sendMessage(newMessage, username, attachment || undefined);
+        if ((newMessage.trim() || attachment) && user) {
+            sendMessage(newMessage, user.username, attachment || undefined);
             setNewMessage('');
             setAttachment(null);
         }
@@ -57,7 +55,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
     };
 
     const handleDelete = (channelId: string, messageId: string) => {
-        if (window.confirm('Are you sure you want to delete this message?')) {
+        if (window.confirm('このメッセージを削除してもよろしいですか？')) {
             deleteMessage(channelId, messageId);
         }
     };
@@ -75,14 +73,14 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
                                     onCancel={() => setEditingMessageId(null)}
                                 />
                             ) : (
-                                username && <MessageItem
+                                user && <MessageItem
                                     message={message}
-                                    isOwnMessage={message.username === username}
-                                    currentUsername={username}
+                                    isOwnMessage={message.username === user.username}
+                                    currentUsername={user.username}
                                     onEdit={(messageId) => setEditingMessageId(messageId)}
                                     onDelete={(messageId) => handleDelete(channelId, messageId)}
-                                    onAddReaction={(messageId, emoji) => addReaction(channelId, messageId, emoji, username)}
-                                    onRemoveReaction={(messageId, emoji) => removeReaction(channelId, messageId, emoji, username)}
+                                    onAddReaction={(messageId, emoji) => addReaction(channelId, messageId, emoji, user.username)}
+                                    onRemoveReaction={(messageId, emoji) => removeReaction(channelId, messageId, emoji, user.username)}
                                 />
                             )}
                         </Box>

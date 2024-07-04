@@ -54,28 +54,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
         const { webSocket, currentChannel } = get();
 
-        // 既に同じチャンネルに接続している場合は何もしない
         if (currentChannel === channelId) {
             return;
         }
 
-        // 既存のWebSocket接続を閉じる
         if (webSocket) {
             webSocket.disconnect();
         }
 
-        // 新しいWebSocket接続を作成
         const newWebSocket = new MockWebSocket(channelId);
         newWebSocket.connect();
         newWebSocket.onMessage((message) => {
             get().addMessage(channelId, message);
         });
 
-        // 状態を更新
         set({
             currentChannel: channelId,
             webSocket: newWebSocket,
-            // 新しいチャンネルのメッセージ配列を初期化（必要な場合）
             messages: {
                 ...get().messages,
                 [channelId]: get().messages[channelId] || []

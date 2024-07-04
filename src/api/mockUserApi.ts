@@ -5,7 +5,7 @@ import { delay } from '../util/delay';
 export const mockUserApi = {
     getProfile: async (): Promise<User> => {
         const authState = useAuthStore.getState();
-        await delay(1000);
+        await delay(500);
         if (!authState.user) {
             throw new Error('User not authenticated');
         }
@@ -14,7 +14,7 @@ export const mockUserApi = {
 
     updateProfile: async (data: UserProfileFormData): Promise<User> => {
         const authState = useAuthStore.getState();
-        await delay(1000);
+        await delay(500);
         if (!authState.user) {
             throw new Error('User not authenticated');
         }
