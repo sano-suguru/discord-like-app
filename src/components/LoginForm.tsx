@@ -1,39 +1,52 @@
-import React, { useState } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, VStack, Text } from '@chakra-ui/react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { Box, Button, FormControl, FormLabel, Input, VStack, Text, FormErrorMessage } from '@chakra-ui/react';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 
+interface LoginFormData {
+    username: string;
+    password: string;
+}
+
+const schema = yup.object().shape({
+    username: yup.string().required('ユーザー名は必須です'),
+    password: yup.string().required('パスワードは必須です'),
+});
+
 const LoginForm: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
     const { login, error } = useAuthStore();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        await login(username, password);
-        navigate('/')
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+        resolver: yupResolver(schema),
+    });
+
+    const onSubmit = async (data: LoginFormData) => {
+        await login(data.username, data.password);
+        navigate('/');
     };
 
     return (
         <Box maxWidth="400px" margin="auto" mt={8}>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <VStack spacing={4}>
-                    <FormControl id="username" isRequired>
+                    <FormControl isInvalid={!!errors.username}>
                         <FormLabel>Username</FormLabel>
                         <Input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            {...register('username')}
                         />
+                        <FormErrorMessage>{errors.username?.message}</FormErrorMessage>
                     </FormControl>
-                    <FormControl id="password" isRequired>
+                    <FormControl isInvalid={!!errors.password}>
                         <FormLabel>Password</FormLabel>
                         <Input
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            {...register('password')}
                         />
+                        <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
                     </FormControl>
                     {error && <Text color="red.500">{error}</Text>}
                     <Button type="submit" colorScheme="blue" width="full">
