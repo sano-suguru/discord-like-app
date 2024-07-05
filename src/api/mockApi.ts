@@ -1,11 +1,16 @@
 import { delay } from "../util/delay";
 
-export const login = async (username: string, password: string) => {
+export interface AuthResponse {
+    success: boolean;
+    token: string | null;
+}
+
+export const login = async (username: string, password: string): Promise<AuthResponse> => {
     await delay(500);
     if (username === 'user' && password === 'password') {
-        return ({ token: 'fake-token' });
+        return ({ success: true, token: 'fake-token' });
     } else {
-        throw new Error('Invalid credentials');
+        return ({ success: false, token: null })
     }
 };
 

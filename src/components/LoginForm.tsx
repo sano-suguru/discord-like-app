@@ -6,19 +6,13 @@ import { useNavigate } from 'react-router-dom';
 const LoginForm: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const login = useAuthStore((state) => state.login);
+    const { login, error } = useAuthStore();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        try {
-            await login(username, password);
-            navigate('/');
-        } catch (err) {
-            setError('Invalid username or password');
-        }
+        await login(username, password);
+        navigate('/')
     };
 
     return (
