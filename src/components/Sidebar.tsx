@@ -1,42 +1,31 @@
-import React from 'react';
-import { Box, VStack, Button, Text } from '@chakra-ui/react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
+import React, { useState } from 'react';
+import { Box, VStack, Button } from '@chakra-ui/react';
+import { ChannelList } from './ChannelList';
+import { CreateChannelModal } from './CreateChannelModal';
 
-const Sidebar: React.FC = () => {
-    const channels = ['general', 'random', 'help'];
-    const { logout } = useAuthStore();
-    const navigate = useNavigate();
+export const Sidebar: React.FC = () => {
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editingChannelId, setEditingChannelId] = useState<string | null>(null);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    const handleEditChannel = (channelId: string) => {
+        setEditingChannelId(channelId);
+    };
+
+    const handleFinishEdit = () => {
+        setEditingChannelId(null);
     };
 
     return (
-        <Box bg="gray.800" w="200px" h="100vh" p={4}>
+        <Box bg="gray.100" w="250px" h="100vh" p={4}>
             <VStack spacing={4} align="stretch">
-                <Text color="white" fontSize="xl" fontWeight="bold">Channels</Text>
-                {channels.map((channel) => (
-                    <Button
-                        key={channel}
-                        as={Link}
-                        to={`/chat/${channel}`}
-                        variant="ghost"
-                        justifyContent="left"
-                        color="gray.300"
-                        _hover={{ bg: 'gray.700' }}
-                    >
-                        # {channel}
-                    </Button>
-                ))}
-                <Box flex={1} />
-                <Button colorScheme="red" size="sm" onClick={handleLogout}>
-                    Logout
-                </Button>
+                <Button onClick={() => setIsCreateModalOpen(true)}>Create Channel</Button>
+                <ChannelList
+                    editingChannelId={editingChannelId}
+                    onEditChannel={handleEditChannel}
+                    onFinishEdit={handleFinishEdit}
+                />
             </VStack>
+            <CreateChannelModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
         </Box>
     );
 };
-
-export default Sidebar;
