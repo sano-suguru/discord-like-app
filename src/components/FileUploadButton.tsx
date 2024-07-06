@@ -29,7 +29,6 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({ onFileSelect }) => 
                 style={{ display: 'none' }}
             />
             <Button onClick={handleClick} leftIcon={<AttachmentIcon />} size="sm">
-                Upload File
             </Button>
         </>
     );

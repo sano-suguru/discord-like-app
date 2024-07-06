@@ -7,6 +7,7 @@ import LoginForm from './components/LoginForm';
 import PrivateRoute from './components/PrivateRoute';
 import ProfilePage from './pages/ProfilePage';
 import { Navbar } from './components/Navbar';
+import { baseUrl } from './util/baseUrl';
 
 const App: React.FC = () => {
   return (
@@ -14,14 +15,14 @@ const App: React.FC = () => {
       <Router>
         <Navbar />
         <Routes>
-          <Route path="/login" element={<LoginForm />} />
+          <Route path={`${baseUrl}login`} element={<LoginForm />} />
           <Route element={<PrivateRoute />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/chat/:channelId" element={<Chat />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path={baseUrl} element={<Home />} />
+            <Route path={`${baseUrl}chat`} element={<Chat />} />
+            <Route path={`${baseUrl}chat/:channelId`} element={<Chat />} />
+            <Route path={`${baseUrl}profile`} element={<ProfilePage />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to={baseUrl} replace />} />
         </Routes>
       </Router>
     </ChakraProvider>

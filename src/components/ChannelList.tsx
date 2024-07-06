@@ -6,6 +6,7 @@ import { useChannelStore } from '../stores/channelStore';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import EditChannelModal from './EditChannelModal';
+import { baseUrl } from '../util/baseUrl';
 
 export const ChannelList: React.FC = () => {
     const { channels, currentChannel, setCurrentChannel, deleteChannel } = useChannelStore();
@@ -15,7 +16,7 @@ export const ChannelList: React.FC = () => {
 
     const handleChannelClick = (channelId: string) => {
         setCurrentChannel(channelId);
-        navigate(`/chat/${channelId}`);
+        navigate(`${baseUrl}chat/${channelId}`);
     };
 
     return (

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Box, Flex, Text, Button, Stack } from '@chakra-ui/react';
 import { useAuthStore } from '../stores/authStore';
+import { baseUrl } from '../util/baseUrl';
 
 interface NavItemProps {
     to: string;
@@ -10,7 +11,9 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = ({ to, children }) => {
     const location = useLocation();
-    const isActive = location.pathname === to || (to === '/chat' && location.pathname.startsWith('/chat'));
+    const isActive = location.pathname === to ||
+        (to === `${baseUrl}chat` &&
+            location.pathname.startsWith(`${baseUrl}chat`));
 
     return (
         <Link to={to}>
@@ -39,11 +42,11 @@ export const Navbar: React.FC = () => {
             <Flex h={16} alignItems="center" justifyContent="space-between">
                 <Flex alignItems="center">
                     <Stack direction="row" spacing={4}>
-                        <NavItem to="/">Home</NavItem>
+                        <NavItem to="/discord-like-app">Home</NavItem>
                         {isAuthenticated && (
                             <>
-                                <NavItem to="/chat">Chat</NavItem>
-                                <NavItem to="/profile">Profile</NavItem>
+                                <NavItem to={`${baseUrl}chat`}>Chat</NavItem>
+                                <NavItem to={`${baseUrl}profile`}>Profile</NavItem>
                             </>
                         )}
                     </Stack>
@@ -54,7 +57,7 @@ export const Navbar: React.FC = () => {
                             Logout
                         </Button>
                     ) : (
-                        <Link to="/login">
+                        <Link to={`${baseUrl}login`}>
                             <Button colorScheme="blue" size="sm">
                                 Login
                             </Button>

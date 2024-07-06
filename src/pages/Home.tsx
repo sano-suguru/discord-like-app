@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, VStack, Heading, Text, Button, SimpleGrid, useColorModeValue } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import { baseUrl } from '../util/baseUrl';
 
 const Home: React.FC = () => {
     const bgColor = useColorModeValue('gray.100', 'gray.700');
@@ -40,7 +41,7 @@ const Home: React.FC = () => {
                                 <Button
                                     key={channel.id}
                                     as={Link}
-                                    to={`/chat/${channel.id}`}
+                                    to={`${baseUrl}chat/${channel.id}`}
                                     variant="ghost"
                                     justifyContent="left"
                                 >

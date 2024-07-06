@@ -26,7 +26,7 @@ const LoginForm: React.FC = () => {
 
     const onSubmit = async (data: LoginFormData) => {
         await login(data.username, data.password);
-        navigate('/');
+        navigate('/discord-like-app');
     };
 
     return (
