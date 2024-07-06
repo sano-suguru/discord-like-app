@@ -42,7 +42,7 @@ export const Navbar: React.FC = () => {
             <Flex h={16} alignItems="center" justifyContent="space-between">
                 <Flex alignItems="center">
                     <Stack direction="row" spacing={4}>
-                        <NavItem to="/discord-like-app">Home</NavItem>
+                        <NavItem to={baseUrl}>Home</NavItem>
                         {isAuthenticated && (
                             <>
                                 <NavItem to={`${baseUrl}chat`}>Chat</NavItem>

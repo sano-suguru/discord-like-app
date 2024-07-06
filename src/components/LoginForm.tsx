@@ -5,6 +5,7 @@ import * as yup from 'yup';
 import { Box, Button, FormControl, FormLabel, Input, VStack, Text, FormErrorMessage } from '@chakra-ui/react';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../util/baseUrl';
 
 interface LoginFormData {
     username: string;
@@ -26,7 +27,7 @@ const LoginForm: React.FC = () => {
 
     const onSubmit = async (data: LoginFormData) => {
         await login(data.username, data.password);
-        navigate('/discord-like-app');
+        navigate(baseUrl);
     };
 
     return (
