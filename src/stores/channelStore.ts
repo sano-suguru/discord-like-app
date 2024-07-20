@@ -1,6 +1,7 @@
-import { create } from 'zustand';
-import { Channel } from '../types/channel';
 import { v4 as uuidv4 } from 'uuid';
+import { create } from 'zustand';
+
+import { Channel } from '../types/channel';
 
 interface ChannelState {
     channels: Channel[];

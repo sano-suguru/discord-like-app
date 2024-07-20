@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, VStack, Heading, Divider } from '@chakra-ui/react';
+
+import { Box, Divider, Heading, VStack } from '@chakra-ui/react';
+
 import { UserProfile } from '../components/UserProfile';
 import { UserProfileForm } from '../components/UserProfileForm';
 

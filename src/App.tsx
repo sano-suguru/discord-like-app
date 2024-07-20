@@ -1,12 +1,14 @@
 import React from 'react';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+
 import { ChakraProvider } from '@chakra-ui/react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import Chat from './pages/Chat';
+
 import LoginForm from './components/LoginForm';
-import PrivateRoute from './components/PrivateRoute';
-import ProfilePage from './pages/ProfilePage';
 import { Navbar } from './components/Navbar';
+import PrivateRoute from './components/PrivateRoute';
+import Chat from './pages/Chat';
+import Home from './pages/Home';
+import ProfilePage from './pages/ProfilePage';
 import { baseUrl } from './util/baseUrl';
 
 const App: React.FC = () => {

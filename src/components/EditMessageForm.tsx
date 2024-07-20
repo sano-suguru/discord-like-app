@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Input, Button, HStack } from '@chakra-ui/react';
+
+import { Button, HStack, Input } from '@chakra-ui/react';
 
 interface EditMessageFormProps {
     initialContent: string;

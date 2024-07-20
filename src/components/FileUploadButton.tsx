@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
-import { Button, Input } from '@chakra-ui/react';
+
 import { AttachmentIcon } from '@chakra-ui/icons';
+import { Button, Input } from '@chakra-ui/react';
 
 interface FileUploadButtonProps {
     onFileSelect: (file: File) => void;

@@ -1,6 +1,8 @@
 import React from 'react';
-import { Box, HStack, VStack, Text, Link, IconButton, Flex, Button } from '@chakra-ui/react';
-import { EditIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
+
+import { DeleteIcon, DownloadIcon, EditIcon } from '@chakra-ui/icons';
+import { Box, Button, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react';
+
 import { Message } from '../types/message';
 import ReactionPicker from './ReactionPicker';
 

@@ -1,13 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Button, HStack, Input, VStack, Text, IconButton } from '@chakra-ui/react';
+import React, { useEffect, useRef, useState } from 'react';
+
 import { DeleteIcon } from '@chakra-ui/icons';
-import { useChatStore } from '../stores/chatStore';
+import { Box, Button, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react';
+
 import { useAuthStore } from '../stores/authStore';
-import EditMessageForm from './EditMessageForm';
+import { useChatStore } from '../stores/chatStore';
+import { useUserStore } from '../stores/userStore';
 import { FileAttachment } from '../types/fileAttachment';
+import { Message } from '../types/message';
+import EditMessageForm from './EditMessageForm';
 import FileUploadButton from './FileUploadButton';
 import MessageItem from './MessageItem';
-import { Message } from '../types/message';
 
 interface ChatAreaProps {
     channelId: string;
@@ -15,7 +18,8 @@ interface ChatAreaProps {
 
 const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
     const { messages, setCurrentChannel, sendMessage, editMessage, deleteMessage, addReaction, removeReaction } = useChatStore();
-    const { user } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
+    const { user } = useUserStore();
     const [newMessage, setNewMessage] = useState('');
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -42,7 +46,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
     };
 
     const handleSend = () => {
-        if ((newMessage.trim() || attachment) && user) {
+        if ((newMessage.trim() || attachment) && isAuthenticated && user) {
             sendMessage(newMessage, user.username, attachment || undefined);
             setNewMessage('');
             setAttachment(null);
@@ -73,15 +77,17 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
                                     onCancel={() => setEditingMessageId(null)}
                                 />
                             ) : (
-                                user && <MessageItem
-                                    message={message}
-                                    isOwnMessage={message.username === user.username}
-                                    currentUsername={user.username}
-                                    onEdit={(messageId) => setEditingMessageId(messageId)}
-                                    onDelete={(messageId) => handleDelete(channelId, messageId)}
-                                    onAddReaction={(messageId, emoji) => addReaction(channelId, messageId, emoji, user.username)}
-                                    onRemoveReaction={(messageId, emoji) => removeReaction(channelId, messageId, emoji, user.username)}
-                                />
+                                isAuthenticated && user && (
+                                    <MessageItem
+                                        message={message}
+                                        isOwnMessage={message.username === user.username}
+                                        currentUsername={user.username}
+                                        onEdit={(messageId) => setEditingMessageId(messageId)}
+                                        onDelete={(messageId) => handleDelete(channelId, messageId)}
+                                        onAddReaction={(messageId, emoji) => addReaction(channelId, messageId, emoji, user.username)}
+                                        onRemoveReaction={(messageId, emoji) => removeReaction(channelId, messageId, emoji, user.username)}
+                                    />
+                                )
                             )}
                         </Box>
                     ))}

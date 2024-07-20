@@ -1,73 +1,111 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import { Box, Button, FormControl, FormLabel, Input, Textarea, VStack, FormErrorMessage } from '@chakra-ui/react';
-import { useUserStore } from '../stores/userStore';
+import {
+    Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Spinner, Textarea, VStack, useToast
+} from '@chakra-ui/react';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useUpdateUser } from '../hooks/useUpdateUser';
+import { useUserQuery } from '../hooks/useUserQuery';
 import { UserProfileFormData } from '../types/user';
+import { useUserStore } from '../stores/userStore'; // import your user store
+
+const BIO_LENGTH_LIMIT = 500;
+const FILE_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB以下
 
 const schema = yup.object().shape({
-    username: yup.string().required('Username is required'),
-    email: yup.string().email('Invalid email').required('Email is required'),
-    bio: yup.string().max(500, 'Bio must be at most 500 characters').optional(),
+    username: yup.string().required('ユーザー名が必須です'),
+    email: yup.string().email('無効なメールアドレスです').required('Eメールは必須です'),
+    bio: yup.string().max(BIO_LENGTH_LIMIT, `経歴は${BIO_LENGTH_LIMIT}文字以内で入力してください`).optional(),
+    avatar: yup.mixed()
+        .test('fileSize', 'ファイルが大きすぎます', (value) => {
+            if (value && value instanceof File) {
+                return value.size <= FILE_SIZE_LIMIT;
+            }
+            return true;
+        })
+        .optional(),
 });
 
 export const UserProfileForm: React.FC = () => {
-    const { user, updateProfile, isLoading, fetchProfile } = useUserStore();
-    const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<UserProfileFormData>({
+    const { data, isLoading } = useUserQuery();
+    const updateUser = useUpdateUser();
+    const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm<UserProfileFormData>({
         resolver: yupResolver(schema),
     });
 
-    useEffect(() => {
-        fetchProfile();
-    }, [fetchProfile]);
+    const { setUser, triggerUpdate } = useUserStore(); // get the setUser method from the store
+    const toast = useToast();
 
     useEffect(() => {
-        if (user) {
-            reset({
-                username: user.username,
-                email: user.email,
-                bio: user.bio || '',
+        if (data) {
+            reset(data);
+        }
+    }, [data, reset]);
+
+    const saveChanges = async (formData: UserProfileFormData) => {
+        try {
+            const updatedUser = await updateUser.mutateAsync({ ...formData });
+            setUser(updatedUser);
+            triggerUpdate();
+            toast({
+                title: "プロフィールが更新されました。",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+        } catch (error) {
+            toast({
+                title: "更新に失敗しました。",
+                description: (error as Error).message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
             });
         }
-    }, [user, reset]);
-
-    const onSubmit = async (data: UserProfileFormData) => {
-        await updateProfile(data);
     };
 
     return (
-        <Box as="form" onSubmit={handleSubmit(onSubmit)}>
+        <Box as="form" onSubmit={handleSubmit(saveChanges)}>
             <VStack spacing={4}>
                 <FormControl isInvalid={!!errors.username}>
                     <FormLabel>Username</FormLabel>
-                    <Input {...register('username')} />
+                    {isLoading ? <Spinner /> : <Input {...register('username')} />}
                     <FormErrorMessage>{errors.username?.message}</FormErrorMessage>
                 </FormControl>
                 <FormControl isInvalid={!!errors.email}>
                     <FormLabel>Email</FormLabel>
-                    <Input {...register('email')} />
+                    {isLoading ? <Spinner /> : <Input {...register('email')} />}
                     <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
                 </FormControl>
                 <FormControl isInvalid={!!errors.bio}>
                     <FormLabel>Bio</FormLabel>
-                    <Textarea {...register('bio')} />
+                    {isLoading ? <Spinner /> : <Textarea {...register('bio')} />}
                     <FormErrorMessage>{errors.bio?.message}</FormErrorMessage>
                 </FormControl>
                 <FormControl>
                     <FormLabel>Avatar</FormLabel>
-                    <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                                setValue('avatar', file);
-                            }
-                        }}
+                    <Controller
+                        name='avatar'
+                        control={control}
+                        render={({ field }) => (
+                            isLoading
+                                ? <Spinner />
+                                : <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        field.onChange(file);
+                                    }}
+                                    onClick={(e) => {
+                                        (e.target as HTMLInputElement).value = '';
+                                    }}
+                                />
+                        )}
                     />
                 </FormControl>
-                <Button type="submit" colorScheme="blue" isLoading={isLoading}>
+                <Button type="submit" colorScheme="blue" isLoading={isSubmitting || isLoading}>
                     Update Profile
                 </Button>
             </VStack>

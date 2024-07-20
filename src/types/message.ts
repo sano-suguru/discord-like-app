@@ -1,7 +1,7 @@
-import { FileAttachment } from "./fileAttachment";
-import { Reaction } from "./reaction";
+import { FileAttachment } from './fileAttachment';
+import { Reaction } from './reaction';
 
-export interface Message {
+export type Message = Readonly<{
     id: string;
     username: string;
     content: string;
@@ -9,5 +9,5 @@ export interface Message {
     isEdited?: boolean;
     attachment?: FileAttachment;
     reactions: { [emoji: string]: Reaction };
-}
+}>;
 

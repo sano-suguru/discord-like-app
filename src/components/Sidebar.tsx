@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Box, VStack, Button } from '@chakra-ui/react';
+
+import { Box, Button, VStack } from '@chakra-ui/react';
+
 import { ChannelList } from './ChannelList';
 import { CreateChannelModal } from './CreateChannelModal';
 

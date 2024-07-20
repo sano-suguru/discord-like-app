@@ -1,16 +1,18 @@
 // ChannelList.tsx
 import React, { useState } from 'react';
-import { Box, VStack, Text, IconButton, Flex } from '@chakra-ui/react';
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
-import { useChannelStore } from '../stores/channelStore';
-import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
-import EditChannelModal from './EditChannelModal';
+
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { Box, Flex, IconButton, Text, VStack } from '@chakra-ui/react';
+
+import { useChannelStore } from '../stores/channelStore';
+import { useUserStore } from '../stores/userStore';
 import { baseUrl } from '../util/baseUrl';
+import EditChannelModal from './EditChannelModal';
 
 export const ChannelList: React.FC = () => {
     const { channels, currentChannel, setCurrentChannel, deleteChannel } = useChannelStore();
-    const user = useAuthStore((state) => state.user);
+    const { user } = useUserStore();
     const navigate = useNavigate();
     const [editingChannel, setEditingChannel] = useState<string | null>(null);
 

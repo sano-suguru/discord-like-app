@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Box, Flex, Text, Button, Stack } from '@chakra-ui/react';
+
+import { Box, Button, Flex, Stack, Text } from '@chakra-ui/react';
+
 import { useAuthStore } from '../stores/authStore';
 import { baseUrl } from '../util/baseUrl';
 
@@ -35,7 +37,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, children }) => {
 };
 
 export const Navbar: React.FC = () => {
-    const { isAuthenticated, logout } = useAuthStore();
+    const { isAuthenticated, logout: clearToken } = useAuthStore();
 
     return (
         <Box bg="white" px={4} boxShadow="sm">
@@ -53,7 +55,7 @@ export const Navbar: React.FC = () => {
                 </Flex>
                 <Flex alignItems="center">
                     {isAuthenticated ? (
-                        <Button onClick={logout} colorScheme="red" size="sm">
+                        <Button onClick={clearToken} colorScheme="red" size="sm">
                             Logout
                         </Button>
                     ) : (

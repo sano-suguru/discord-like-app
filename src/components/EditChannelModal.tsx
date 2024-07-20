@@ -1,18 +1,11 @@
 import React from 'react';
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
-    Button,
-    FormControl,
-    FormLabel,
-    Input,
-} from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
+
+import {
+    Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent,
+    ModalFooter, ModalHeader, ModalOverlay
+} from '@chakra-ui/react';
+
 import { useChannelStore } from '../stores/channelStore';
 
 interface EditChannelModalProps {

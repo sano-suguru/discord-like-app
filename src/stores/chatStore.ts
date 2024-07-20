@@ -1,7 +1,8 @@
 import { create } from 'zustand';
+
 import MockWebSocket from '../services/mockWebSocket';
-import { Message } from '../types/message';
 import { FileAttachment } from '../types/fileAttachment';
+import { Message } from '../types/message';
 
 interface ChatState {
     messages: { [channelId: string]: Message[] };

@@ -1,9 +1,13 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Button, FormControl, FormLabel, Input, Textarea, Switch } from '@chakra-ui/react';
-import { useChannelStore } from '../stores/channelStore';
-import { useAuthStore } from '../stores/authStore';
 
+import {
+    Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent,
+    ModalFooter, ModalHeader, ModalOverlay, Switch, Textarea
+} from '@chakra-ui/react';
+
+import { useChannelStore } from '../stores/channelStore';
+import { useUserStore } from '../stores/userStore';
 
 interface CreateChannelForm {
     name: string;
@@ -19,7 +23,7 @@ interface CreateChannelModalProps {
 export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({ isOpen, onClose }) => {
     const { register, handleSubmit, reset } = useForm<CreateChannelForm>();
     const createChannel = useChannelStore(state => state.createChannel);
-    const user = useAuthStore(state => state.user);
+    const { user } = useUserStore();
 
     const onSubmit = (data: CreateChannelForm) => {
         if (user) {

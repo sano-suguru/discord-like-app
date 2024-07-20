@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Button, Popover, PopoverTrigger, PopoverContent, SimpleGrid } from '@chakra-ui/react';
+
+import { Button, Popover, PopoverContent, PopoverTrigger, SimpleGrid } from '@chakra-ui/react';
 
 const emojis = ['👍', '❤️', '😄', '😮', '😢', '😡'];
 

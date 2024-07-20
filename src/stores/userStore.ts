@@ -1,35 +1,23 @@
 import { create } from 'zustand';
-import { User, UserProfileFormData } from '../types/user';
-import { mockUserApi } from '../api/mockUserApi';
 
-interface UserStore {
+import { User } from '../types/user';
+
+export type UserStore = Readonly<{
     user: User | null;
-    isLoading: boolean;
-    error: string | null;
-    fetchProfile: () => Promise<void>;
-    updateProfile: (data: UserProfileFormData) => Promise<void>;
-}
+    setUser: (user: User) => void;
+    clearUser: () => void;
+    updateTrigger: number;
+    triggerUpdate: () => void;
+}>
 
 export const useUserStore = create<UserStore>((set) => ({
     user: null,
-    isLoading: false,
-    error: null,
-    fetchProfile: async () => {
-        set({ isLoading: true, error: null });
-        try {
-            const user = await mockUserApi.getProfile();
-            set({ user, isLoading: false });
-        } catch (error) {
-            set({ error: 'Failed to fetch profile', isLoading: false });
-        }
+    setUser: (user: User) => {
+        set({ user: { ...user } });
     },
-    updateProfile: async (data: UserProfileFormData) => {
-        set({ isLoading: true, error: null });
-        try {
-            const updatedUser = await mockUserApi.updateProfile(data);
-            set({ user: updatedUser, isLoading: false });
-        } catch (error) {
-            set({ error: 'Failed to update profile', isLoading: false });
-        }
+    clearUser: () => {
+        set({ user: null });
     },
+    updateTrigger: 0,
+    triggerUpdate: () => set((state) => ({ updateTrigger: state.updateTrigger + 1 })),
 }));

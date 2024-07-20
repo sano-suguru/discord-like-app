@@ -1,6 +1,10 @@
 import React from 'react';
-import { Box, VStack, Heading, Text, Button, SimpleGrid, useColorModeValue } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+
+import {
+    Box, Button, Heading, SimpleGrid, Text, useColorModeValue, VStack
+} from '@chakra-ui/react';
+
 import { baseUrl } from '../util/baseUrl';
 
 const Home: React.FC = () => {
