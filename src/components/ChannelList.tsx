@@ -1,5 +1,4 @@
-// ChannelList.tsx
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
@@ -16,10 +15,24 @@ export const ChannelList: React.FC = () => {
     const navigate = useNavigate();
     const [editingChannel, setEditingChannel] = useState<string | null>(null);
 
-    const handleChannelClick = (channelId: string) => {
+    const handleChannelClick = useCallback((channelId: string) => {
         setCurrentChannel(channelId);
         navigate(`${baseUrl}chat/${channelId}`);
-    };
+    }, [navigate, setCurrentChannel]);
+
+    const handleEditClick = useCallback((channelId: string, event: React.MouseEvent) => {
+        event.stopPropagation();
+        setEditingChannel(channelId);
+    }, [setEditingChannel]);
+
+    const handleDeleteClick = useCallback((channelId: string, event: React.MouseEvent) => {
+        event.stopPropagation();
+        deleteChannel(channelId);
+    }, [deleteChannel]);
+
+    const editingChannelDetails = useMemo(() => {
+        return channels.find(c => c.id === editingChannel) || null;
+    }, [channels, editingChannel]);
 
     return (
         <VStack align="stretch" spacing={2}>
@@ -42,29 +55,26 @@ export const ChannelList: React.FC = () => {
                                 icon={<EditIcon />}
                                 size="xs"
                                 mr={1}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingChannel(channel.id);
-                                }}
+                                onClick={(e) => handleEditClick(channel.id, e)}
                             />
                             <IconButton
                                 aria-label="Delete channel"
                                 icon={<DeleteIcon />}
                                 size="xs"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteChannel(channel.id);
-                                }}
+                                onClick={(e) => handleDeleteClick(channel.id, e)}
                             />
                         </Box>
                     )}
                 </Flex>
             ))}
-            <EditChannelModal
-                isOpen={!!editingChannel}
-                onClose={() => setEditingChannel(null)}
-                channelId={editingChannel}
-            />
+            {editingChannel && editingChannelDetails && (
+                <EditChannelModal
+                    isOpen={!!editingChannel}
+                    onClose={() => setEditingChannel(null)}
+                    channelId={editingChannel}
+                    currentName={editingChannelDetails.name}
+                />
+            )}
         </VStack>
     );
 };

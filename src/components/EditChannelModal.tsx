@@ -12,13 +12,14 @@ interface EditChannelModalProps {
     isOpen: boolean;
     onClose: () => void;
     channelId: string | null;
+    currentName: string;
 }
 
 interface EditChannelForm {
     name: string;
 }
 
-const EditChannelModal: React.FC<EditChannelModalProps> = ({ isOpen, onClose, channelId }) => {
+const EditChannelModal: React.FC<EditChannelModalProps> = ({ isOpen, onClose, channelId, currentName: currentChannelName }) => {
     const { channels, updateChannel } = useChannelStore();
     const channel = channels.find((c) => c.id === channelId);
     const { register, handleSubmit, reset } = useForm<EditChannelForm>({
@@ -43,7 +44,7 @@ const EditChannelModal: React.FC<EditChannelModalProps> = ({ isOpen, onClose, ch
                     <ModalBody>
                         <FormControl>
                             <FormLabel>Channel Name</FormLabel>
-                            <Input {...register('name', { required: true })} />
+                            <Input {...register('name', { required: true })} placeholder={currentChannelName} />
                         </FormControl>
                     </ModalBody>
                     <ModalFooter>
