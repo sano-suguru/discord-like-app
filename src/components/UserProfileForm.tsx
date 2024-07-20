@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import {
@@ -43,7 +43,7 @@ export const UserProfileForm: React.FC = () => {
         }
     }, [data, reset]);
 
-    const saveChanges = async (formData: UserProfileFormData) => {
+    const saveChanges = useCallback(async (formData: UserProfileFormData) => {
         try {
             const updatedUser = await updateUser.mutateAsync({ ...formData });
             setUser(updatedUser);
@@ -63,7 +63,7 @@ export const UserProfileForm: React.FC = () => {
                 isClosable: true,
             });
         }
-    };
+    }, [updateUser.mutateAsync, setUser, triggerUpdate]);
 
     return (
         <Box as="form" onSubmit={handleSubmit(saveChanges)}>

@@ -10,4 +10,3 @@ export type Message = Readonly<{
     attachment?: FileAttachment;
     reactions: { [emoji: string]: Reaction };
 }>;
-

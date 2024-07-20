@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -49,9 +49,9 @@ const LoginForm: React.FC = () => {
         }
     });
 
-    const onSubmit = async (data: LoginCredentials) => {
+    const onSubmit = useCallback(async (data: LoginCredentials) => {
         await mutation.mutateAsync(data)
-    };
+    }, [mutation.mutateAsync]);
 
     if (mutation.isPending) return <Spinner />
 

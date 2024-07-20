@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { Button, HStack, Input } from '@chakra-ui/react';
 
@@ -11,11 +11,11 @@ interface EditMessageFormProps {
 const EditMessageForm: React.FC<EditMessageFormProps> = ({ initialContent, onSave, onCancel }) => {
     const [content, setContent] = useState(initialContent);
 
-    const handleSave = () => {
+    const handleSave = useCallback(() => {
         if (content.trim()) {
             onSave(content);
         }
-    };
+    }, [content, onSave]);
 
     return (
         <HStack>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -8,6 +8,7 @@ import {
 
 import { useChannelStore } from '../stores/channelStore';
 import { useUserStore } from '../stores/userStore';
+import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
 
 interface CreateChannelForm {
     name: string;
@@ -25,13 +26,15 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({ isOpen, 
     const createChannel = useChannelStore(state => state.createChannel);
     const { user } = useUserStore();
 
-    const onSubmit = (data: CreateChannelForm) => {
+    const memorizedUser = useDeepCompareMemoize([user]);
+
+    const onSubmit = useCallback((data: CreateChannelForm) => {
         if (user) {
             createChannel(data.name, data.description, data.isPrivate, user.id);
             reset();
             onClose();
         }
-    };
+    }, [createChannel, memorizedUser, reset, onClose]);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>

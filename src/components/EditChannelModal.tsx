@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -26,13 +26,13 @@ const EditChannelModal: React.FC<EditChannelModalProps> = ({ isOpen, onClose, ch
         defaultValues: { name: channel?.name || '' },
     });
 
-    const onSubmit = (data: EditChannelForm) => {
+    const onSubmit = useCallback((data: EditChannelForm) => {
         if (channelId) {
             updateChannel(channelId, { name: data.name });
             onClose();
             reset();
         }
-    };
+    }, [channelId, updateChannel, onClose, reset]);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>

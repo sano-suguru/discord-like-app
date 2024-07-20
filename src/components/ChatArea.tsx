@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Box, Button, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react';
@@ -11,6 +11,7 @@ import { Message } from '../types/message';
 import EditMessageForm from './EditMessageForm';
 import FileUploadButton from './FileUploadButton';
 import MessageItem from './MessageItem';
+import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
 
 interface ChatAreaProps {
     channelId: string;
@@ -30,39 +31,43 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
         }
     }, [channelId, setCurrentChannel]);
 
+    const memorizedMessage = useDeepCompareMemoize(messages[channelId])
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages[channelId]]);
+    }, [memorizedMessage]);
 
     const [attachment, setAttachment] = useState<FileAttachment | null>(null);
 
-    const handleFileSelect = async (file: File) => {
+    const handleFileSelect = useCallback((file: File) => {
         const url = URL.createObjectURL(file);
         setAttachment({
             name: file.name,
             url: url,
             type: file.type,
         });
-    };
+    }, [setAttachment]);
 
-    const handleSend = () => {
+    const memorizedUser = useDeepCompareMemoize([user]);
+
+    const handleSend = useCallback(() => {
         if ((newMessage.trim() || attachment) && isAuthenticated && user) {
             sendMessage(newMessage, user.username, attachment || undefined);
             setNewMessage('');
             setAttachment(null);
         }
-    };
+    }, [newMessage, attachment, isAuthenticated, memorizedUser]);
 
     const handleEdit = (channelId: string, messageId: string, newContent: string) => {
         editMessage(channelId, messageId, newContent);
         setEditingMessageId(null);
     };
 
-    const handleDelete = (channelId: string, messageId: string) => {
+    const handleDelete = useCallback((channelId: string, messageId: string) => {
         if (window.confirm('このメッセージを削除してもよろしいですか？')) {
             deleteMessage(channelId, messageId);
         }
-    };
+    }, [deleteMessage]);
 
     return (
         <Box flex={1} p={4}>

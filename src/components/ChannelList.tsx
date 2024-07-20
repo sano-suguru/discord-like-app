@@ -8,6 +8,7 @@ import { useChannelStore } from '../stores/channelStore';
 import { useUserStore } from '../stores/userStore';
 import { baseUrl } from '../util/baseUrl';
 import EditChannelModal from './EditChannelModal';
+import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
 
 export const ChannelList: React.FC = () => {
     const { channels, currentChannel, setCurrentChannel, deleteChannel } = useChannelStore();
@@ -30,9 +31,11 @@ export const ChannelList: React.FC = () => {
         deleteChannel(channelId);
     }, [deleteChannel]);
 
+    const memorizedChannels = useDeepCompareMemoize([channels])
+
     const editingChannelDetails = useMemo(() => {
         return channels.find(c => c.id === editingChannel) || null;
-    }, [channels, editingChannel]);
+    }, [memorizedChannels, editingChannel]);
 
     return (
         <VStack align="stretch" spacing={2}>

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { AttachmentIcon } from '@chakra-ui/icons';
 import { Button, Input } from '@chakra-ui/react';
@@ -10,16 +10,16 @@ interface FileUploadButtonProps {
 const FileUploadButton: React.FC<FileUploadButtonProps> = ({ onFileSelect }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleClick = () => {
+    const handleClick = useCallback(() => {
         fileInputRef.current?.click();
-    };
+    }, [fileInputRef]);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
             onFileSelect(file);
         }
-    };
+    }, [onFileSelect]);
 
     return (
         <>
