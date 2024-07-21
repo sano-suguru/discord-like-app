@@ -3,7 +3,7 @@ import { Message } from '../types/message';
 
 type MessageCallback = (message: Message) => void;
 
-class MockWebSocket {
+export class MockWebSocket {
     private callbacks: MessageCallback[] = [];
     private interval: number | null = null;
 
@@ -57,5 +57,3 @@ class MockWebSocket {
         // 実際のWebSocketでは、ここでサーバーにメッセージを送信します
     }
 }
-
-export default MockWebSocket;

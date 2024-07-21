@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { useAuthStore } from '../stores/authStore';
 import { baseUrl } from '../util/baseUrl';
 
-const PrivateRoute: React.FC = () => {
-    const { isAuthenticated } = useAuthStore();
+export const PrivateRoute: React.FC = React.memo(() => {
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
-    return isAuthenticated ? <Outlet /> : <Navigate to={`${baseUrl}login`} />;
-};
+    const redirectComponent = useMemo(() => <Navigate to={`${baseUrl}login`} replace />, []);
 
-export default PrivateRoute;
+    return isAuthenticated ? <Outlet /> : redirectComponent;
+});

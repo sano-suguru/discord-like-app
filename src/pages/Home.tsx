@@ -7,21 +7,31 @@ import {
 
 import { baseUrl } from '../util/baseUrl';
 
-const Home: React.FC = () => {
+interface Activity {
+    id: number;
+    text: string;
+}
+
+interface Channel {
+    id: string;
+    name: string;
+}
+
+const recentActivities: Activity[] = [
+    { id: 1, text: 'New message in #general' },
+    { id: 2, text: 'Friend request from User123' },
+    { id: 3, text: 'Mentioned in #random' },
+];
+
+const popularChannels: Channel[] = [
+    { id: 'general', name: 'General' },
+    { id: 'random', name: 'Random' },
+    { id: 'help', name: 'Help' },
+];
+
+export const Home: React.FC = React.memo(() => {
     const bgColor = useColorModeValue('gray.100', 'gray.700');
     const cardBgColor = useColorModeValue('white', 'gray.600');
-
-    const recentActivities = [
-        { id: 1, text: 'New message in #general' },
-        { id: 2, text: 'Friend request from User123' },
-        { id: 3, text: 'Mentioned in #random' },
-    ];
-
-    const popularChannels = [
-        { id: 'general', name: 'General' },
-        { id: 'random', name: 'Random' },
-        { id: 'help', name: 'Help' },
-    ];
 
     return (
         <Box bg={bgColor} minH="100vh" p={8}>
@@ -70,6 +80,4 @@ const Home: React.FC = () => {
             </VStack>
         </Box>
     );
-};
-
-export default Home;
+});

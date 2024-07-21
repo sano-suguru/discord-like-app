@@ -1,40 +1,41 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { Button, Popover, PopoverContent, PopoverTrigger, SimpleGrid } from '@chakra-ui/react';
 
-const emojis = ['👍', '❤️', '😄', '😮', '😢', '😡'];
+const emojis = ['👍', '❤️', '😄', '😮', '😢', '😡'] as const;
 
 interface ReactionPickerProps {
     onSelectEmoji: (emoji: string) => void;
 }
 
-const ReactionPicker: React.FC<ReactionPickerProps> = ({ onSelectEmoji }) => {
-    const [isOpen, setIsOpen] = useState(false);
+export const ReactionPicker: React.FC<ReactionPickerProps> = React.memo(({ onSelectEmoji }) => {
+    const handleEmojiSelect = useCallback((emoji: string) => {
+        onSelectEmoji(emoji);
+    }, [onSelectEmoji]);
+
+    const emojiButtons = useMemo(() => (
+        emojis.map((emoji) => (
+            <Button
+                key={emoji}
+                onClick={() => handleEmojiSelect(emoji)}
+            >
+                {emoji}
+            </Button>
+        ))
+    ), [handleEmojiSelect]);
 
     return (
-        <Popover isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <Popover>
             <PopoverTrigger>
-                <Button size="sm" onClick={() => setIsOpen(!isOpen)}>
+                <Button size="sm">
                     Add Reaction
                 </Button>
             </PopoverTrigger>
             <PopoverContent>
                 <SimpleGrid columns={3} spacing={2} p={2}>
-                    {emojis.map((emoji) => (
-                        <Button
-                            key={emoji}
-                            onClick={() => {
-                                onSelectEmoji(emoji);
-                                setIsOpen(false);
-                            }}
-                        >
-                            {emoji}
-                        </Button>
-                    ))}
+                    {emojiButtons}
                 </SimpleGrid>
             </PopoverContent>
         </Popover>
     );
-};
-
-export default ReactionPicker;
+});

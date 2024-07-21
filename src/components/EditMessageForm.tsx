@@ -8,20 +8,25 @@ interface EditMessageFormProps {
     onCancel: () => void;
 }
 
-const EditMessageForm: React.FC<EditMessageFormProps> = ({ initialContent, onSave, onCancel }) => {
+export const EditMessageForm: React.FC<EditMessageFormProps> = ({ initialContent, onSave, onCancel }) => {
     const [content, setContent] = useState(initialContent);
 
     const handleSave = useCallback(() => {
-        if (content.trim()) {
-            onSave(content);
+        const trimmedContent = content.trim();
+        if (trimmedContent) {
+            onSave(trimmedContent);
         }
     }, [content, onSave]);
+
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setContent(e.target.value);
+    }, [setContent]);
 
     return (
         <HStack>
             <Input
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={handleChange}
                 placeholder="Edit message..."
             />
             <Button onClick={handleSave}>Save</Button>
@@ -29,5 +34,3 @@ const EditMessageForm: React.FC<EditMessageFormProps> = ({ initialContent, onSav
         </HStack>
     );
 };
-
-export default EditMessageForm;

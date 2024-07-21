@@ -1,14 +1,66 @@
 import React, { useCallback, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
+
 import {
-    Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Spinner, Textarea, VStack, useToast
+    Box, Button, FormControl, FormErrorMessage, FormLabel, Input, Skeleton, Textarea, useToast,
+    VStack
 } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
+
 import { useUpdateUser } from '../hooks/useUpdateUser';
 import { useUserQuery } from '../hooks/useUserQuery';
+import { useUserStore } from '../stores/userStore';
 import { UserProfileFormData } from '../types/user';
-import { useUserStore } from '../stores/userStore'; // import your user store
+
+interface UserProfileFormComponentProps {
+    isLoading: boolean;
+    control: any;
+    register: any;
+    errors: Partial<Record<keyof UserProfileFormData, { message?: string }>>;
+}
+
+const UserProfileFormComponent: React.FC<UserProfileFormComponentProps> = ({ isLoading, control, register, errors }) => (
+    <VStack spacing={4}>
+        <FormControl isInvalid={!!errors.username}>
+            <FormLabel>Username</FormLabel>
+            {isLoading ? <Skeleton height="40px" /> : <Input {...register('username')} />}
+            <FormErrorMessage>{errors.username?.message}</FormErrorMessage>
+        </FormControl>
+        <FormControl isInvalid={!!errors.email}>
+            <FormLabel>Email</FormLabel>
+            {isLoading ? <Skeleton height="40px" /> : <Input {...register('email')} />}
+            <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
+        </FormControl>
+        <FormControl isInvalid={!!errors.bio}>
+            <FormLabel>Bio</FormLabel>
+            {isLoading ? <Skeleton height="80px" /> : <Textarea {...register('bio')} />}
+            <FormErrorMessage>{errors.bio?.message}</FormErrorMessage>
+        </FormControl>
+        <FormControl>
+            <FormLabel>Avatar</FormLabel>
+            <Controller
+                name='avatar'
+                control={control}
+                render={({ field }) => (
+                    isLoading
+                        ? <Skeleton height="40px" />
+                        : <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                field.onChange(file);
+                            }}
+                            onClick={(e) => {
+                                (e.target as HTMLInputElement).value = '';
+                            }}
+                        />
+                )}
+            />
+        </FormControl>
+    </VStack>
+);
 
 const BIO_LENGTH_LIMIT = 500;
 const FILE_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB以下
@@ -27,7 +79,7 @@ const schema = yup.object().shape({
         .optional(),
 });
 
-export const UserProfileForm: React.FC = () => {
+export const UserProfileForm: React.FC = React.memo(() => {
     const { data, isLoading } = useUserQuery();
     const updateUser = useUpdateUser();
     const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm<UserProfileFormData>({
@@ -63,52 +115,14 @@ export const UserProfileForm: React.FC = () => {
                 isClosable: true,
             });
         }
-    }, [updateUser.mutateAsync, setUser, triggerUpdate]);
+    }, [updateUser.mutateAsync, setUser, triggerUpdate, toast]);
 
     return (
         <Box as="form" onSubmit={handleSubmit(saveChanges)}>
-            <VStack spacing={4}>
-                <FormControl isInvalid={!!errors.username}>
-                    <FormLabel>Username</FormLabel>
-                    {isLoading ? <Spinner /> : <Input {...register('username')} />}
-                    <FormErrorMessage>{errors.username?.message}</FormErrorMessage>
-                </FormControl>
-                <FormControl isInvalid={!!errors.email}>
-                    <FormLabel>Email</FormLabel>
-                    {isLoading ? <Spinner /> : <Input {...register('email')} />}
-                    <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
-                </FormControl>
-                <FormControl isInvalid={!!errors.bio}>
-                    <FormLabel>Bio</FormLabel>
-                    {isLoading ? <Spinner /> : <Textarea {...register('bio')} />}
-                    <FormErrorMessage>{errors.bio?.message}</FormErrorMessage>
-                </FormControl>
-                <FormControl>
-                    <FormLabel>Avatar</FormLabel>
-                    <Controller
-                        name='avatar'
-                        control={control}
-                        render={({ field }) => (
-                            isLoading
-                                ? <Spinner />
-                                : <Input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        field.onChange(file);
-                                    }}
-                                    onClick={(e) => {
-                                        (e.target as HTMLInputElement).value = '';
-                                    }}
-                                />
-                        )}
-                    />
-                </FormControl>
-                <Button type="submit" colorScheme="blue" isLoading={isSubmitting || isLoading}>
-                    Update Profile
-                </Button>
-            </VStack>
+            <UserProfileFormComponent isLoading={isLoading} control={control} register={register} errors={errors} />
+            <Button type="submit" colorScheme="blue" isLoading={isSubmitting || isLoading}>
+                プロフィールを更新
+            </Button>
         </Box>
     );
-};
+});

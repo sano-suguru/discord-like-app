@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { DeleteIcon, DownloadIcon, EditIcon } from '@chakra-ui/icons';
 import { Box, Button, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react';
 
 import { Message } from '../types/message';
-import ReactionPicker from './ReactionPicker';
+import { ReactionPicker } from './ReactionPicker';
 
 interface MessageItemProps {
     message: Message;
@@ -16,69 +16,86 @@ interface MessageItemProps {
     onRemoveReaction: (messageId: string, emoji: string) => void;
 }
 
-const MessageItem: React.FC<MessageItemProps> = React.memo(
-    ({ message, isOwnMessage, currentUsername, onEdit, onDelete, onAddReaction, onRemoveReaction }) => {
-        const handleReaction = (emoji: string) => {
-            if (message.reactions[emoji]?.users.includes(currentUsername)) {
-                onRemoveReaction(message.id, emoji);
-            } else {
-                onAddReaction(message.id, emoji);
-            }
-        };
+const MessageItem: React.FC<MessageItemProps> = React.memo(({
+    message,
+    isOwnMessage,
+    currentUsername,
+    onEdit,
+    onDelete,
+    onAddReaction,
+    onRemoveReaction
+}) => {
+    const handleReaction = useCallback((emoji: string) => {
+        if (message.reactions[emoji]?.users.includes(currentUsername)) {
+            onRemoveReaction(message.id, emoji);
+        } else {
+            onAddReaction(message.id, emoji);
+        }
+    }, [message.id, message.reactions, currentUsername, onAddReaction, onRemoveReaction]);
 
-        return (
-            <Flex justifyContent={isOwnMessage ? 'flex-end' : 'flex-start'} mb={2} w="100%">
-                <Box maxW="70%" bg={isOwnMessage ? 'blue.100' : 'gray.100'} p={2} borderRadius="md" boxShadow="md">
-                    <VStack align="stretch" spacing={1}>
+    const handleEdit = useCallback(() => onEdit(message.id), [message.id, onEdit]);
+    const handleDelete = useCallback(() => onDelete(message.id), [message.id, onDelete]);
+    const handleAddReaction = useCallback((emoji: string) => onAddReaction(message.id, emoji), [message.id, onAddReaction]);
+
+    const messageColor = isOwnMessage ? 'blue' : 'gray';
+
+    const reactionButtons = useMemo(() => (
+        Object.entries(message.reactions || {}).map(([emoji, reaction]) => (
+            <Button
+                key={emoji}
+                size="xs"
+                onClick={() => handleReaction(emoji)}
+                colorScheme={reaction.users.includes(currentUsername) ? 'blue' : 'gray'}
+            >
+                {emoji} {reaction.count}
+            </Button>
+        ))
+    ), [message.reactions, currentUsername, handleReaction]);
+
+    return (
+        <Flex justifyContent={isOwnMessage ? 'flex-end' : 'flex-start'} mb={2} w="100%">
+            <Box maxW="70%" bg={`${messageColor}.100`} p={2} borderRadius="md" boxShadow="md">
+                <VStack align="stretch" spacing={1}>
+                    <HStack>
+                        <Text fontWeight="bold" color={`${messageColor}.600`}>
+                            {message.username}
+                        </Text>
+                        {isOwnMessage && <Text fontSize="xs" color={`${messageColor}.600`}>(You)</Text>}
+                    </HStack>
+                    <Text>{message.content}</Text>
+                    {message.isEdited && <Text fontSize="xs" color="gray.500">(edited)</Text>}
+                    {message.attachment && (
                         <HStack>
-                            <Text fontWeight="bold" color={isOwnMessage ? 'blue.600' : 'gray.600'}>
-                                {message.username}
-                            </Text>
-                            {isOwnMessage && <Text fontSize="xs" color="blue.600">(You)</Text>}
+                            <DownloadIcon />
+                            <Link href={message.attachment.url} isExternal color="blue.500">
+                                {message.attachment.name}
+                            </Link>
                         </HStack>
-                        <Text>{message.content}</Text>
-                        {message.isEdited && <Text fontSize="xs" color="gray.500">(edited)</Text>}
-                        {message.attachment && (
-                            <HStack>
-                                <DownloadIcon />
-                                <Link href={message.attachment.url} isExternal color="blue.500">
-                                    {message.attachment.name}
-                                </Link>
-                            </HStack>
-                        )}
-                        {isOwnMessage && (
-                            <HStack justifyContent="flex-end">
-                                <IconButton
-                                    aria-label="Edit message"
-                                    icon={<EditIcon />}
-                                    size="xs"
-                                    onClick={() => onEdit(message.id)}
-                                />
-                                <IconButton
-                                    aria-label="Delete message"
-                                    icon={<DeleteIcon />}
-                                    size="xs"
-                                    onClick={() => onDelete(message.id)}
-                                />
-                            </HStack>
-                        )}
-                        <HStack wrap="wrap" spacing={1} mt={2}>
-                            {message.reactions && Object.entries(message.reactions).map(([emoji, reaction]) => (
-                                <Button
-                                    key={emoji}
-                                    size="xs"
-                                    onClick={() => handleReaction(emoji)}
-                                    colorScheme={reaction.users.includes(currentUsername) ? 'blue' : 'gray'}
-                                >
-                                    {emoji} {reaction.count}
-                                </Button>
-                            ))}
-                            <ReactionPicker onSelectEmoji={(emoji) => onAddReaction(message.id, emoji)} />
+                    )}
+                    {isOwnMessage && (
+                        <HStack justifyContent="flex-end">
+                            <IconButton
+                                aria-label="Edit message"
+                                icon={<EditIcon />}
+                                size="xs"
+                                onClick={handleEdit}
+                            />
+                            <IconButton
+                                aria-label="Delete message"
+                                icon={<DeleteIcon />}
+                                size="xs"
+                                onClick={handleDelete}
+                            />
                         </HStack>
-                    </VStack>
-                </Box>
-            </Flex>
-        );
-    });
+                    )}
+                    <HStack wrap="wrap" spacing={1} mt={2}>
+                        {reactionButtons}
+                        <ReactionPicker onSelectEmoji={handleAddReaction} />
+                    </HStack>
+                </VStack>
+            </Box>
+        </Flex>
+    );
+});
 
 export default MessageItem;

@@ -7,18 +7,19 @@ interface FileUploadButtonProps {
     onFileSelect: (file: File) => void;
 }
 
-const FileUploadButton: React.FC<FileUploadButtonProps> = ({ onFileSelect }) => {
+export const FileUploadButton: React.FC<FileUploadButtonProps> = React.memo(({ onFileSelect }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleClick = useCallback(() => {
         fileInputRef.current?.click();
-    }, [fileInputRef]);
+    }, []);
 
     const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
             onFileSelect(file);
         }
+        event.target.value = '';
     }, [onFileSelect]);
 
     return (
@@ -28,11 +29,9 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({ onFileSelect }) => 
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z"
             />
-            <Button onClick={handleClick} leftIcon={<AttachmentIcon />} size="sm">
-            </Button>
+            <Button onClick={handleClick} leftIcon={<AttachmentIcon />} size="sm" aria-label="Upload file" />
         </>
     );
-};
-
-export default FileUploadButton;
+});

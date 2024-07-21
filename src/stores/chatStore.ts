@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import MockWebSocket from '../services/mockWebSocket';
+import { MockWebSocket } from '../services/mockWebSocket';
 import { FileAttachment } from '../types/fileAttachment';
 import { Message } from '../types/message';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { Box, Button, Flex, Stack, Text } from '@chakra-ui/react';
@@ -11,11 +11,12 @@ interface NavItemProps {
     children: React.ReactNode;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ to, children }) => {
+const NavItem: React.FC<NavItemProps> = React.memo(({ to, children }) => {
     const location = useLocation();
-    const isActive = location.pathname === to ||
-        (to === `${baseUrl}chat` &&
-            location.pathname.startsWith(`${baseUrl}chat`));
+    const isActive = useMemo(() => {
+        return location.pathname === to ||
+            (to === `${baseUrl}chat` && location.pathname.startsWith(`${baseUrl}chat`));
+    }, [location.pathname, to]);
 
     return (
         <Link to={to}>
@@ -34,10 +35,18 @@ const NavItem: React.FC<NavItemProps> = ({ to, children }) => {
             </Text>
         </Link>
     );
-};
+});
 
 export const Navbar: React.FC = () => {
     const { isAuthenticated, logout: clearToken } = useAuthStore();
+    const handleLogout = useCallback(() => clearToken(), [clearToken]);
+
+    const authenticatedNavItems = useMemo(() => (
+        <>
+            <NavItem to={`${baseUrl}chat`}>Chat</NavItem>
+            <NavItem to={`${baseUrl}profile`}>Profile</NavItem>
+        </>
+    ), []);
 
     return (
         <Box bg="white" px={4} boxShadow="sm">
@@ -45,17 +54,12 @@ export const Navbar: React.FC = () => {
                 <Flex alignItems="center">
                     <Stack direction="row" spacing={4}>
                         <NavItem to={baseUrl}>Home</NavItem>
-                        {isAuthenticated && (
-                            <>
-                                <NavItem to={`${baseUrl}chat`}>Chat</NavItem>
-                                <NavItem to={`${baseUrl}profile`}>Profile</NavItem>
-                            </>
-                        )}
+                        {isAuthenticated && authenticatedNavItems}
                     </Stack>
                 </Flex>
                 <Flex alignItems="center">
                     {isAuthenticated ? (
-                        <Button onClick={clearToken} colorScheme="red" size="sm">
+                        <Button onClick={handleLogout} colorScheme="red" size="sm">
                             Logout
                         </Button>
                     ) : (

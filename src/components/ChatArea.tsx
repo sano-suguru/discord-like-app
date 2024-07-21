@@ -1,15 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Box, Button, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react';
-
 import { useAuthStore } from '../stores/authStore';
 import { useChatStore } from '../stores/chatStore';
 import { useUserStore } from '../stores/userStore';
 import { FileAttachment } from '../types/fileAttachment';
 import { Message } from '../types/message';
-import EditMessageForm from './EditMessageForm';
-import FileUploadButton from './FileUploadButton';
+import { EditMessageForm } from './EditMessageForm';
+import { FileUploadButton } from './FileUploadButton';
 import MessageItem from './MessageItem';
 import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
 
@@ -17,12 +15,13 @@ interface ChatAreaProps {
     channelId: string;
 }
 
-const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
+export const ChatArea: React.FC<ChatAreaProps> = React.memo(({ channelId }) => {
     const { messages, setCurrentChannel, sendMessage, editMessage, deleteMessage, addReaction, removeReaction } = useChatStore();
     const { isAuthenticated } = useAuthStore();
     const { user } = useUserStore();
     const [newMessage, setNewMessage] = useState('');
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [attachment, setAttachment] = useState<FileAttachment | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -31,13 +30,12 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
         }
     }, [channelId, setCurrentChannel]);
 
-    const memorizedMessage = useDeepCompareMemoize(messages[channelId])
+    const memorizedMessages = useDeepCompareMemoize(messages[channelId]);
+    const [memorizedUser] = useDeepCompareMemoize([user]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [memorizedMessage]);
-
-    const [attachment, setAttachment] = useState<FileAttachment | null>(null);
+    }, [memorizedMessages]);
 
     const handleFileSelect = useCallback((file: File) => {
         const url = URL.createObjectURL(file);
@@ -46,56 +44,58 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
             url: url,
             type: file.type,
         });
-    }, [setAttachment]);
-
-    const memorizedUser = useDeepCompareMemoize([user]);
+    }, []);
 
     const handleSend = useCallback(() => {
-        if ((newMessage.trim() || attachment) && isAuthenticated && user) {
-            sendMessage(newMessage, user.username, attachment || undefined);
+        if ((newMessage.trim() || attachment) && isAuthenticated && memorizedUser) {
+            sendMessage(newMessage, memorizedUser.username, attachment || undefined);
             setNewMessage('');
             setAttachment(null);
         }
-    }, [newMessage, attachment, isAuthenticated, memorizedUser]);
+    }, [newMessage, attachment, isAuthenticated, memorizedUser, sendMessage]);
 
-    const handleEdit = (channelId: string, messageId: string, newContent: string) => {
+    const handleEdit = useCallback((channelId: string, messageId: string, newContent: string) => {
         editMessage(channelId, messageId, newContent);
         setEditingMessageId(null);
-    };
+    }, [editMessage]);
 
-    const handleDelete = useCallback((channelId: string, messageId: string) => {
+    const handleDelete = useCallback((messageId: string) => {
         if (window.confirm('このメッセージを削除してもよろしいですか？')) {
             deleteMessage(channelId, messageId);
         }
-    }, [deleteMessage]);
+    }, [channelId, deleteMessage]);
+
+    const messageItems = useMemo(() => {
+        return memorizedMessages?.map((message: Message) => (
+            <Box key={message.id}>
+                {editingMessageId === message.id ? (
+                    <EditMessageForm
+                        initialContent={message.content}
+                        onSave={(newContent) => handleEdit(channelId, message.id, newContent)}
+                        onCancel={() => setEditingMessageId(null)}
+                    />
+                ) : (
+                    isAuthenticated && memorizedUser && (
+                        <MessageItem
+                            message={message}
+                            isOwnMessage={message.username === memorizedUser.username}
+                            currentUsername={memorizedUser.username}
+                            onEdit={setEditingMessageId}
+                            onDelete={handleDelete}
+                            onAddReaction={(messageId, emoji) => addReaction(channelId, messageId, emoji, memorizedUser.username)}
+                            onRemoveReaction={(messageId, emoji) => removeReaction(channelId, messageId, emoji, memorizedUser.username)}
+                        />
+                    )
+                )}
+            </Box>
+        ));
+    }, [memorizedMessages, editingMessageId, isAuthenticated, memorizedUser, channelId, handleEdit, handleDelete, addReaction, removeReaction]);
 
     return (
         <Box flex={1} p={4}>
             <VStack spacing={4} align="stretch" h="calc(100vh - 100px)">
                 <Box flex={1} overflowY="auto">
-                    {messages[channelId]?.map((message: Message) => (
-                        <Box key={message.id}>
-                            {editingMessageId === message.id ? (
-                                <EditMessageForm
-                                    initialContent={message.content}
-                                    onSave={(newContent) => handleEdit(channelId, message.id, newContent)}
-                                    onCancel={() => setEditingMessageId(null)}
-                                />
-                            ) : (
-                                isAuthenticated && user && (
-                                    <MessageItem
-                                        message={message}
-                                        isOwnMessage={message.username === user.username}
-                                        currentUsername={user.username}
-                                        onEdit={(messageId) => setEditingMessageId(messageId)}
-                                        onDelete={(messageId) => handleDelete(channelId, messageId)}
-                                        onAddReaction={(messageId, emoji) => addReaction(channelId, messageId, emoji, user.username)}
-                                        onRemoveReaction={(messageId, emoji) => removeReaction(channelId, messageId, emoji, user.username)}
-                                    />
-                                )
-                            )}
-                        </Box>
-                    ))}
+                    {messageItems}
                     <div ref={messagesEndRef} />
                 </Box>
                 <HStack>
@@ -126,6 +126,4 @@ const ChatArea: React.FC<ChatAreaProps> = ({ channelId }) => {
             </VStack>
         </Box>
     );
-};
-
-export default ChatArea;
+});

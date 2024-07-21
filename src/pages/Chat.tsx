@@ -3,17 +3,16 @@ import { useParams } from 'react-router-dom';
 
 import { Box, Flex } from '@chakra-ui/react';
 
-import ChatArea from '../components/ChatArea';
+import { ChatArea } from '../components/ChatArea';
 import { Sidebar } from '../components/Sidebar';
-import { useChannelStore } from '../stores/channelStore';
 import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
+import { useChannelStore } from '../stores/channelStore';
 
-const Chat: React.FC = () => {
+export const Chat: React.FC = React.memo(() => {
     const { channelId } = useParams<{ channelId: string }>();
     const { currentChannel, setCurrentChannel, channels } = useChannelStore();
 
     const memorizedChannels = useDeepCompareMemoize(channels);
-
     const memorizedCurrentChannel = useDeepCompareMemoize([currentChannel]);
 
     useEffect(() => {
@@ -36,6 +35,4 @@ const Chat: React.FC = () => {
             </Box>
         </Flex>
     );
-};
-
-export default Chat;
+});
