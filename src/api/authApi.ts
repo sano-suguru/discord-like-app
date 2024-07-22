@@ -27,4 +27,4 @@ export const login = async (username: string, password: string): Promise<AuthRes
 
 export const logout = async () => {
     await delay(500);
-}
+};

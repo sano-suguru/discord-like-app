@@ -11,3 +11,5 @@ export const PrivateRoute: React.FC = React.memo(() => {
 
     return isAuthenticated ? <Outlet /> : redirectComponent;
 });
+
+PrivateRoute.displayName = 'PrivateRoute';

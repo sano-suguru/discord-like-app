@@ -58,6 +58,8 @@ const ChannelItem = React.memo<ChannelItemProps>(({
     </Flex>
 ));
 
+ChannelItem.displayName = 'ChannelItem';
+
 export const ChannelList: React.FC = React.memo(() => {
     const { channels, currentChannel, setCurrentChannel, deleteChannel } = useChannelStore();
     const { user } = useUserStore();
@@ -109,3 +111,5 @@ export const ChannelList: React.FC = React.memo(() => {
         </VStack>
     );
 });
+
+ChannelList.displayName = 'ChannelList';

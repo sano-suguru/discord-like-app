@@ -5,7 +5,7 @@ type ModuleWithComponent<T> = {
     [key: string]: T | undefined;
 };
 
-const lazyNamedComponent = <T extends ComponentType<PropsWithChildren<{}>>>(
+export const lazyNamedComponent = <T extends ComponentType<PropsWithChildren<Record<string, never>>>>(
     factory: () => Promise<ModuleWithComponent<T>>
 ): LazyExoticComponent<T> => {
     return React.lazy(async () => {
@@ -26,6 +26,3 @@ const lazyNamedComponent = <T extends ComponentType<PropsWithChildren<{}>>>(
         throw new Error('Unexpected module structure');
     });
 };
-
-// エイリアスを定義
-export const lazyNC = lazyNamedComponent;

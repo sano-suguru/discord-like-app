@@ -35,3 +35,5 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = React.memo(({ o
         </>
     );
 });
+
+FileUploadButton.displayName = 'FileUploadButton';

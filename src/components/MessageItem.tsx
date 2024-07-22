@@ -16,7 +16,7 @@ interface MessageItemProps {
     onRemoveReaction: (messageId: string, emoji: string) => void;
 }
 
-const MessageItem: React.FC<MessageItemProps> = React.memo(({
+export const MessageItem: React.FC<MessageItemProps> = React.memo(({
     message,
     isOwnMessage,
     currentUsername,
@@ -98,4 +98,4 @@ const MessageItem: React.FC<MessageItemProps> = React.memo(({
     );
 });
 
-export default MessageItem;
+MessageItem.displayName = 'MessageItem';

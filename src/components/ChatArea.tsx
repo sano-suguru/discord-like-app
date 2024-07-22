@@ -8,7 +8,7 @@ import { FileAttachment } from '../types/fileAttachment';
 import { Message } from '../types/message';
 import { EditMessageForm } from './EditMessageForm';
 import { FileUploadButton } from './FileUploadButton';
-import MessageItem from './MessageItem';
+import { MessageItem } from './MessageItem';
 import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
 
 interface ChatAreaProps {
@@ -127,3 +127,5 @@ export const ChatArea: React.FC<ChatAreaProps> = React.memo(({ channelId }) => {
         </Box>
     );
 });
+
+ChatArea.displayName = 'ChatArea';

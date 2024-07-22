@@ -8,7 +8,7 @@ export type UserStore = Readonly<{
     clearUser: () => void;
     updateTrigger: number;
     triggerUpdate: () => void;
-}>
+}>;
 
 export const useUserStore = create<UserStore>((set) => ({
     user: null,

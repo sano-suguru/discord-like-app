@@ -67,3 +67,5 @@ export const EditChannelModal: React.FC<EditChannelModalProps> = React.memo(({ i
         </Modal>
     );
 });
+
+EditChannelModal.displayName = 'EditChannelModal';

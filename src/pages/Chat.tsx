@@ -18,8 +18,8 @@ export const Chat: React.FC = React.memo(() => {
     useEffect(() => {
         if (channelId) {
             setCurrentChannel(channelId);
-        } else if (channels.length > 0 && !currentChannel) {
-            setCurrentChannel(channels[0].id);
+        } else if (memorizedChannels.length > 0 && !memorizedCurrentChannel) {
+            setCurrentChannel(memorizedChannels[0].id);
         }
     }, [channelId, memorizedChannels, memorizedCurrentChannel, setCurrentChannel]);
 
@@ -36,3 +36,5 @@ export const Chat: React.FC = React.memo(() => {
         </Flex>
     );
 });
+
+Chat.displayName = 'Chat';

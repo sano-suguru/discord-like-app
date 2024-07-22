@@ -19,7 +19,10 @@ module.exports = {
   },
   plugins: ['react', '@typescript-eslint'],
   rules: {
-    // カスタムルールをここに追加
+    "react/prop-types": "off",
+    'semi': ['error', 'always'],
+    '@typescript-eslint/semi': ['error', 'always'],
+    'eol-last': ['error', 'always'],
   },
   settings: {
     react: {

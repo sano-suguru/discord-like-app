@@ -81,3 +81,5 @@ export const Home: React.FC = React.memo(() => {
         </Box>
     );
 });
+
+Home.displayName = 'Home';

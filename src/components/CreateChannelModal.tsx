@@ -84,3 +84,5 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = React.memo(
         </Modal>
     );
 });
+
+CreateChannelModal.displayName = 'CreateChannelModal';

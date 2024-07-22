@@ -6,12 +6,12 @@ import { Spinner } from '@chakra-ui/react';
 import { Navbar } from './components/Navbar';
 import { PrivateRoute } from './components/PrivateRoute';
 import { baseUrl } from './util/baseUrl';
-import { lazyNC } from './util/lazyNamedComponent';
+import { lazyNamedComponent } from './util/lazyNamedComponent';
 
-const LoginForm = lazyNC(() => import('./components/LoginForm'));
-const Home = lazyNC(() => import('./pages/Home'));
-const Chat = lazyNC(() => import('./pages/Chat'));
-const ProfilePage = lazyNC(() => import('./pages/ProfilePage'));
+const LoginForm = lazyNamedComponent(() => import('./components/LoginForm'));
+const Home = lazyNamedComponent(() => import('./pages/Home'));
+const Chat = lazyNamedComponent(() => import('./pages/Chat'));
+const ProfilePage = lazyNamedComponent(() => import('./pages/ProfilePage'));
 
 export const App: React.FC = () => {
   return (

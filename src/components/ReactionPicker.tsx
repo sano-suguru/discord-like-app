@@ -39,3 +39,5 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = React.memo(({ onSel
         </Popover>
     );
 });
+
+ReactionPicker.displayName = 'ReactionPicker';

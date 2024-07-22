@@ -37,6 +37,8 @@ const NavItem: React.FC<NavItemProps> = React.memo(({ to, children }) => {
     );
 });
 
+NavItem.displayName = 'NavItem';
+
 export const Navbar: React.FC = () => {
     const { isAuthenticated, logout: clearToken } = useAuthStore();
     const handleLogout = useCallback(() => clearToken(), [clearToken]);

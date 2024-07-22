@@ -12,3 +12,5 @@ export const GlobalStyle: React.FC = React.memo(() => (
         `}
     />
 ));
+
+GlobalStyle.displayName = 'GlobalStyle';

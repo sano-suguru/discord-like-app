@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, Control, UseFormRegister, FieldErrors, ControllerRenderProps } from 'react-hook-form';
 import * as yup from 'yup';
 
 import {
@@ -15,52 +15,61 @@ import { UserProfileFormData } from '../types/user';
 
 interface UserProfileFormComponentProps {
     isLoading: boolean;
-    control: any;
-    register: any;
-    errors: Partial<Record<keyof UserProfileFormData, { message?: string }>>;
+    control: Control<UserProfileFormData>;
+    register: UseFormRegister<UserProfileFormData>;
+    errors: FieldErrors<UserProfileFormData>;
 }
 
-const UserProfileFormComponent: React.FC<UserProfileFormComponentProps> = ({ isLoading, control, register, errors }) => (
-    <VStack spacing={4}>
-        <FormControl isInvalid={!!errors.username}>
-            <FormLabel>Username</FormLabel>
-            {isLoading ? <Skeleton height="40px" /> : <Input {...register('username')} />}
-            <FormErrorMessage>{errors.username?.message}</FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.email}>
-            <FormLabel>Email</FormLabel>
-            {isLoading ? <Skeleton height="40px" /> : <Input {...register('email')} />}
-            <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.bio}>
-            <FormLabel>Bio</FormLabel>
-            {isLoading ? <Skeleton height="80px" /> : <Textarea {...register('bio')} />}
-            <FormErrorMessage>{errors.bio?.message}</FormErrorMessage>
-        </FormControl>
-        <FormControl>
-            <FormLabel>Avatar</FormLabel>
-            <Controller
-                name='avatar'
-                control={control}
-                render={({ field }) => (
-                    isLoading
-                        ? <Skeleton height="40px" />
-                        : <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                field.onChange(file);
-                            }}
-                            onClick={(e) => {
-                                (e.target as HTMLInputElement).value = '';
-                            }}
-                        />
-                )}
-            />
-        </FormControl>
-    </VStack>
-);
+const UserProfileFormComponent: React.FC<UserProfileFormComponentProps> = ({ isLoading, control, register, errors }) => {
+    const handleFileChange = useCallback((field: ControllerRenderProps<UserProfileFormData, 'avatar'>) =>
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            field.onChange(file);
+        }, []
+    );
+
+    const handleFileClick = useCallback((e: React.MouseEvent<HTMLInputElement>) => {
+        e.currentTarget.value = '';
+    }, []);
+
+
+    return (
+        <VStack spacing={4}>
+            <FormControl isInvalid={!!errors.username}>
+                <FormLabel>Username</FormLabel>
+                {isLoading ? <Skeleton height="40px" /> : <Input {...register('username')} />}
+                <FormErrorMessage>{errors.username?.message}</FormErrorMessage>
+            </FormControl>
+            <FormControl isInvalid={!!errors.email}>
+                <FormLabel>Email</FormLabel>
+                {isLoading ? <Skeleton height="40px" /> : <Input {...register('email')} />}
+                <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
+            </FormControl>
+            <FormControl isInvalid={!!errors.bio}>
+                <FormLabel>Bio</FormLabel>
+                {isLoading ? <Skeleton height="80px" /> : <Textarea {...register('bio')} />}
+                <FormErrorMessage>{errors.bio?.message}</FormErrorMessage>
+            </FormControl>
+            <FormControl>
+                <FormLabel>Avatar</FormLabel>
+                <Controller
+                    name='avatar'
+                    control={control}
+                    render={({ field }) => (
+                        isLoading
+                            ? <Skeleton height="40px" />
+                            : <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange(field)}
+                                onClick={handleFileClick}
+                            />
+                    )}
+                />
+            </FormControl>
+        </VStack>
+    );
+};
 
 const BIO_LENGTH_LIMIT = 500;
 const FILE_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB以下
@@ -86,7 +95,7 @@ export const UserProfileForm: React.FC = React.memo(() => {
         resolver: yupResolver(schema),
     });
 
-    const { setUser, triggerUpdate } = useUserStore(); // get the setUser method from the store
+    const { setUser, triggerUpdate } = useUserStore();
     const toast = useToast();
 
     useEffect(() => {
@@ -109,13 +118,13 @@ export const UserProfileForm: React.FC = React.memo(() => {
         } catch (error) {
             toast({
                 title: "更新に失敗しました。",
-                description: (error as Error).message,
+                description: error instanceof Error ? error.message : '不明なエラーが発生しました',
                 status: "error",
                 duration: 3000,
                 isClosable: true,
             });
         }
-    }, [updateUser.mutateAsync, setUser, triggerUpdate, toast]);
+    }, [updateUser, setUser, triggerUpdate, toast]);
 
     return (
         <Box as="form" onSubmit={handleSubmit(saveChanges)}>
@@ -126,3 +135,5 @@ export const UserProfileForm: React.FC = React.memo(() => {
         </Box>
     );
 });
+
+UserProfileForm.displayName = 'UserProfileForm';
