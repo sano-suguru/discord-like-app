@@ -4,17 +4,17 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import { Box, Button, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react';
 
 import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
+import { MockWebSocket } from '../services/webSocket';
 import { useAuthStore } from '../stores/authStore';
 import { useChatStore } from '../stores/chatStore';
 import { useUserStore } from '../stores/userStore';
 import { FileAttachment } from '../types/fileAttachment';
 import { Message } from '../types/message';
+import { ChatParticipant } from '../types/user';
 import { EditMessageForm } from './EditMessageForm';
 import { FileUploadButton } from './FileUploadButton';
 import { MentionSuggestions } from './MentionSuggestions';
 import { MessageItem } from './MessageItem';
-import { MockWebSocket } from '../services/webSocket';
-import { ChatParticipant } from '../types/user';
 
 interface ChatAreaProps {
     channelId: string;

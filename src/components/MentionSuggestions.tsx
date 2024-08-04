@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, List, ListItem } from '@chakra-ui/react';
-import { ChatParticipant } from '../types/user';
 
+import { Box, List, ListItem } from '@chakra-ui/react';
+
+import { ChatParticipant } from '../types/user';
 
 interface MentionSuggestionsProps {
     users: ChatParticipant[];

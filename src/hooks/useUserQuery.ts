@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchUser, fetchCurrentUser } from '../api/userApi';
-import { UserQueryParams } from '../types/user';
+import { fetchCurrentUser, fetchUser } from '../api/userApi';
 import { useUserStore } from '../stores/userStore';
+import { UserQueryParams } from '../types/user';
 
 export const useUserQuery = (params?: UserQueryParams) => {
     const { updateTrigger } = useUserStore();
