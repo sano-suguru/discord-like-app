@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { updateUser } from '../api/userApi';
-import { UserProfileFormData, UserQueryParams } from '../types/user';
+import { AuthenticatedUser, UserProfileFormData, UserQueryParams } from '../types/user';
 
 export const userKeys = {
     all: ['users'] as const,
@@ -14,7 +14,7 @@ export const userKeys = {
 export const useUpdateUser = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    return useMutation<AuthenticatedUser, Error, UserProfileFormData & UserQueryParams>({
         mutationFn: async (data: UserProfileFormData & UserQueryParams) => {
             return await updateUser(data);
         },
