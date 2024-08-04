@@ -24,9 +24,9 @@ interface CreateChannelModalProps {
 export const CreateChannelModal: React.FC<CreateChannelModalProps> = React.memo(({ isOpen, onClose }) => {
     const { register, handleSubmit, reset } = useForm<CreateChannelForm>();
     const createChannel = useChannelStore(state => state.createChannel);
-    const user = useUserStore(state => state.user);
+    const currentUser = useUserStore(state => state.currentUser);
 
-    const [memorizedUser] = useDeepCompareMemoize([user]);
+    const [memorizedUser] = useDeepCompareMemoize([currentUser]);
 
     const onSubmit = useCallback((data: CreateChannelForm) => {
         if (memorizedUser) {

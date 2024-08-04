@@ -62,7 +62,7 @@ ChannelItem.displayName = 'ChannelItem';
 
 export const ChannelList: React.FC = React.memo(() => {
     const { channels, currentChannel, setCurrentChannel, deleteChannel } = useChannelStore();
-    const { user } = useUserStore();
+    const { currentUser } = useUserStore();
     const navigate = useNavigate();
     const [editingChannel, setEditingChannel] = useState<string | null>(null);
 
@@ -94,7 +94,7 @@ export const ChannelList: React.FC = React.memo(() => {
                     key={channel.id}
                     channel={channel}
                     isCurrentChannel={currentChannel?.id === channel.id}
-                    isCreator={user?.id === channel.createdBy}
+                    isCreator={currentUser?.id === channel.createdBy}
                     onChannelClick={handleChannelClick}
                     onEditClick={handleEditClick}
                     onDeleteClick={handleDeleteClick}

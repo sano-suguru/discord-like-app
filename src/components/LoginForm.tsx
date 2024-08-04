@@ -30,7 +30,7 @@ export const LoginForm: React.FC = () => {
     });
     const authenticate = useAuthStore(state => state.authenticate);
     const logout = useAuthStore(state => state.logout);
-    const setUser = useUserStore(state => state.setUser);
+    const setUser = useUserStore(state => state.setCurrentUser);
 
     const navigate = useNavigate();
 

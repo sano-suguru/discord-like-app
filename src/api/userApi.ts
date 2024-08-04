@@ -1,26 +1,37 @@
-import { useUserStore } from '../stores/userStore';
-import { User, UserProfileFormData } from '../types/user';
+import { AuthenticatedUser, UserProfileFormData, UserQueryParams } from '../types/user';
 import { delay } from '../util/delay';
 
-export const fetchUser = async (): Promise<User> => {
+const mockUsers: AuthenticatedUser[] = [
+    { id: '1', username: 'user1', email: 'user1@example.com', bio: 'I am user 1' },
+    { id: '2', username: 'user2', email: 'user2@example.com', bio: 'I am user 2' },
+];
+
+export const fetchUser = async ({ userId }: UserQueryParams): Promise<AuthenticatedUser> => {
     await delay(500);
-    const user = useUserStore.getState().user;
-    if (!user?.id) {
-        throw new Error('ユーザーが認証されていません');
+    const user = mockUsers.find(u => u.id === userId);
+    if (!user) {
+        throw new Error('User not found');
     }
-    return Promise.resolve({ ...user });
+    return { ...user };
 };
 
-export const updateUser = async (data: UserProfileFormData): Promise<User> => {
+export const updateUser = async (data: UserProfileFormData & UserQueryParams): Promise<AuthenticatedUser> => {
     await delay(500);
-    const user = useUserStore.getState().user;
-    if (!user) {
-        throw new Error('ユーザーが認証されていません');
+    const userIndex = mockUsers.findIndex(u => u.id === data.userId);
+    if (userIndex === -1) {
+        throw new Error('User not found');
     }
     const updatedUser = {
-        ...user,
+        ...mockUsers[userIndex],
         ...data,
-        avatar: data.avatar ? URL.createObjectURL(data.avatar) : user.avatar,
+        avatar: data.avatar ? URL.createObjectURL(data.avatar) : mockUsers[userIndex].avatar,
     };
-    return Promise.resolve(updatedUser);
+    mockUsers[userIndex] = updatedUser;
+    return { ...updatedUser };
+};
+
+export const fetchCurrentUser = async (): Promise<AuthenticatedUser> => {
+    await delay(500);
+    // For mock purposes, always return the first user as the current user
+    return { ...mockUsers[0] };
 };

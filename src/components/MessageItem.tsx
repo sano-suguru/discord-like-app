@@ -52,6 +52,20 @@ export const MessageItem: React.FC<MessageItemProps> = React.memo(({
         ))
     ), [message.reactions, currentUsername, handleReaction]);
 
+    const renderContent = useMemo(() => {
+        const words = message.content.split(' ');
+        return words.map((word, index) => {
+            if (word.startsWith('@')) {
+                return (
+                    <Text as="span" key={index} fontWeight="bold" color="blue.500">
+                        {word}{' '}
+                    </Text>
+                );
+            }
+            return word + ' ';
+        });
+    }, [message.content]);
+
     return (
         <Flex justifyContent={isOwnMessage ? 'flex-end' : 'flex-start'} mb={2} w="100%">
             <Box maxW="70%" bg={`${messageColor}.100`} p={2} borderRadius="md" boxShadow="md">
@@ -62,7 +76,7 @@ export const MessageItem: React.FC<MessageItemProps> = React.memo(({
                         </Text>
                         {isOwnMessage && <Text fontSize="xs" color={`${messageColor}.600`}>(You)</Text>}
                     </HStack>
-                    <Text>{message.content}</Text>
+                    <Text>{renderContent}</Text>
                     {message.isEdited && <Text fontSize="xs" color="gray.500">(edited)</Text>}
                     {message.attachment && (
                         <HStack>

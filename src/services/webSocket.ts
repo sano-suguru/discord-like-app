@@ -1,28 +1,29 @@
 import { v4 as uuidv4 } from 'uuid';
+
 import { Message } from '../types/message';
+import { ChatParticipant } from '../types/user';
 
 type MessageCallback = (message: Message) => void;
-
-interface User {
-    name: string;
-    personality: 'polite' | 'casual' | 'formal' | 'enthusiastic';
-}
 
 export class MockWebSocket {
     private readonly callbacks: Set<MessageCallback> = new Set();
     private intervalId: number | null = null;
     private readonly INTERVAL_MS = 5000;
-    private lastUser: User | null = null;
+    private lastUser: ChatParticipant | null = null;
 
     constructor(private readonly channelId: string) { }
 
-    private static getUsers(): User[] {
+    private static getUsers(): ChatParticipant[] {
         return [
-            { name: "田中", personality: 'polite' },
-            { name: "佐藤", personality: 'casual' },
-            { name: "鈴木", personality: 'formal' },
-            { name: "高橋", personality: 'enthusiastic' },
+            { id: '1', username: "Tanaka", email: "tanaka@example.com", personality: 'polite' },
+            { id: '2', username: "Sato", email: "sato@example.com", personality: 'casual' },
+            { id: '3', username: "Suzuki", email: "suzuki@example.com", personality: 'formal' },
+            { id: '4', username: "Takahashi", email: "takahashi@example.com", personality: 'enthusiastic' },
         ];
+    }
+
+    public static getChannelUsers(): ChatParticipant[] {
+        return MockWebSocket.getUsers();
     }
 
     private static getJapaneseLoremIpsum(): string {
@@ -42,11 +43,12 @@ export class MockWebSocket {
             "暑い夏の日には、風鈴の音を聞きながら冷たい麦茶を飲むのが一番です。",
             "紅葉狩りに行った時の、あの鮮やかな景色は忘れられません。",
             "初詣で引いたおみくじは大吉でした。今年は良い年になりそうです。",
+
         ];
         return sentences[Math.floor(Math.random() * sentences.length)];
     }
 
-    private getNextUser(): User {
+    private getNextUser(): ChatParticipant {
         const users = MockWebSocket.getUsers();
         let nextUser;
         do {
@@ -56,26 +58,15 @@ export class MockWebSocket {
         return nextUser;
     }
 
-    private generateMessage(user: User): string {
+    private generateMessage(user: ChatParticipant): string {
         const baseMessage = MockWebSocket.getJapaneseLoremIpsum();
-        let prefix = '';
-
-        switch (user.personality) {
-            case 'polite':
-                prefix = 'そうですね、';
-                break;
-            case 'casual':
-                prefix = 'ねえ、';
-                break;
-            case 'formal':
-                prefix = '申し上げますと、';
-                break;
-            case 'enthusiastic':
-                prefix = 'わぁ！';
-                break;
-        }
-
-        return prefix + baseMessage;
+        const prefixes = {
+            'polite': 'そうですね、',
+            'casual': 'ねえ、',
+            'formal': '申し上げますと、',
+            'enthusiastic': 'わぁ！',
+        };
+        return prefixes[user.personality] + baseMessage;
     }
 
     public connect(): void {
@@ -86,7 +77,7 @@ export class MockWebSocket {
             const user = this.getNextUser();
             const mockedMessage: Message = {
                 id: uuidv4(),
-                username: user.name,
+                username: user.username,
                 content: this.generateMessage(user),
                 timestamp: new Date(),
                 reactions: {}
@@ -112,6 +103,5 @@ export class MockWebSocket {
 
     public sendMessage(content: string): void {
         console.log(`Sending message to ${this.channelId}: ${content}`);
-        // 実際のWebSocketでは、ここでサーバーにメッセージを送信します
     }
 }

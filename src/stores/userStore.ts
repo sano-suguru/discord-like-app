@@ -1,23 +1,19 @@
 import { create } from 'zustand';
 
-import { User } from '../types/user';
+import { AuthenticatedUser } from '../types/user';
 
-export type UserStore = Readonly<{
-    user: User | null;
-    setUser: (user: User) => void;
-    clearUser: () => void;
+interface UserStore {
+    currentUser: AuthenticatedUser | null;
+    setCurrentUser: (user: AuthenticatedUser) => void;
+    clearCurrentUser: () => void;
     updateTrigger: number;
     triggerUpdate: () => void;
-}>;
+}
 
 export const useUserStore = create<UserStore>((set) => ({
-    user: null,
-    setUser: (user: User) => {
-        set({ user: { ...user } });
-    },
-    clearUser: () => {
-        set({ user: null });
-    },
+    currentUser: null,
+    setCurrentUser: (user: AuthenticatedUser) => set({ currentUser: { ...user } }),
+    clearCurrentUser: () => set({ currentUser: null }),
     updateTrigger: 0,
     triggerUpdate: () => set((state) => ({ updateTrigger: state.updateTrigger + 1 })),
 }));

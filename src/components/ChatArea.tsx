@@ -1,6 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Box, Button, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react';
+
+import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
 import { useAuthStore } from '../stores/authStore';
 import { useChatStore } from '../stores/chatStore';
 import { useUserStore } from '../stores/userStore';
@@ -8,8 +11,10 @@ import { FileAttachment } from '../types/fileAttachment';
 import { Message } from '../types/message';
 import { EditMessageForm } from './EditMessageForm';
 import { FileUploadButton } from './FileUploadButton';
+import { MentionSuggestions } from './MentionSuggestions';
 import { MessageItem } from './MessageItem';
-import { useDeepCompareMemoize } from '../hooks/useDeepCompareMemoize';
+import { MockWebSocket } from '../services/webSocket';
+import { ChatParticipant } from '../types/user';
 
 interface ChatAreaProps {
     channelId: string;
@@ -18,20 +23,26 @@ interface ChatAreaProps {
 export const ChatArea: React.FC<ChatAreaProps> = React.memo(({ channelId }) => {
     const { messages, setCurrentChannel, sendMessage, editMessage, deleteMessage, addReaction, removeReaction } = useChatStore();
     const { isAuthenticated } = useAuthStore();
-    const { user } = useUserStore();
+    const { currentUser } = useUserStore();
     const [newMessage, setNewMessage] = useState('');
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [attachment, setAttachment] = useState<FileAttachment | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [mentionSearch, setMentionSearch] = useState<string | null>(null);
+    const [mentionUsers, setMentionUsers] = useState<ChatParticipant[]>([]);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (channelId) {
             setCurrentChannel(channelId);
+            // Note: この部分は実際の実装に合わせて調整が必要です
+            const mockUsers = MockWebSocket.getChannelUsers();
+            setMentionUsers(mockUsers);
         }
     }, [channelId, setCurrentChannel]);
 
     const memorizedMessages = useDeepCompareMemoize(messages[channelId]);
-    const [memorizedUser] = useDeepCompareMemoize([user]);
+    const [memorizedUser] = useDeepCompareMemoize([currentUser]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,6 +56,49 @@ export const ChatArea: React.FC<ChatAreaProps> = React.memo(({ channelId }) => {
             type: file.type,
         });
     }, []);
+
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setNewMessage(value);
+
+        const cursorPosition = e.target.selectionStart || 0;
+        const textBeforeCursor = value.slice(0, cursorPosition);
+        const words = textBeforeCursor.split(/\s/);
+        const lastWord = words[words.length - 1];
+
+        if (lastWord.startsWith('@')) {
+            setMentionSearch(lastWord.slice(1));
+        } else {
+            setMentionSearch(null);
+        }
+    }, []);
+
+    const handleSelectUser = useCallback((username: string) => {
+        if (inputRef.current) {
+            const cursorPosition = inputRef.current.selectionStart || 0;
+            const textBeforeCursor = newMessage.slice(0, cursorPosition);
+            const textAfterCursor = newMessage.slice(cursorPosition);
+            const words = textBeforeCursor.split(/\s/);
+            words[words.length - 1] = `@${username} `;
+            const newText = [...words, textAfterCursor].join(' ');
+            setNewMessage(newText);
+            setMentionSearch(null);
+
+            // カーソルを適切な位置に移動
+            setTimeout(() => {
+                const newCursorPosition = newText.length - textAfterCursor.length;
+                inputRef.current?.setSelectionRange(newCursorPosition, newCursorPosition);
+                inputRef.current?.focus();
+            }, 0);
+        }
+    }, [newMessage]);
+
+    const filteredUsers = useMemo(() => {
+        if (!mentionSearch) return mentionUsers;
+        return mentionUsers.filter(user =>
+            user.username.toLowerCase().startsWith(mentionSearch.toLowerCase())
+        );
+    }, [mentionSearch, mentionUsers]);
 
     const handleSend = useCallback(() => {
         if ((newMessage.trim() || attachment) && isAuthenticated && memorizedUser) {
@@ -98,10 +152,11 @@ export const ChatArea: React.FC<ChatAreaProps> = React.memo(({ channelId }) => {
                     {messageItems}
                     <div ref={messagesEndRef} />
                 </Box>
-                <HStack>
+                <HStack position="relative">
                     <Input
+                        ref={inputRef}
                         value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
+                        onChange={handleInputChange}
                         placeholder="Type a message..."
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -109,6 +164,12 @@ export const ChatArea: React.FC<ChatAreaProps> = React.memo(({ channelId }) => {
                             }
                         }}
                     />
+                    {mentionSearch !== null && (
+                        <MentionSuggestions
+                            users={filteredUsers}
+                            onSelectUser={handleSelectUser}
+                        />
+                    )}
                     <FileUploadButton onFileSelect={handleFileSelect} />
                     <Button onClick={handleSend}>Send</Button>
                 </HStack>

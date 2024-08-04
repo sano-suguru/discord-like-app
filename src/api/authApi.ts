@@ -1,4 +1,4 @@
-import { User } from '../types/user';
+import { AuthenticatedUser } from '../types/user';
 import { delay } from '../util/delay';
 
 const MOCK_TOKEN = 'mock-token';
@@ -6,7 +6,7 @@ const MOCK_TOKEN = 'mock-token';
 export interface AuthResponse {
     success: boolean;
     token: string | null;
-    user: User | null;
+    user: AuthenticatedUser | null;
 }
 
 export const login = async (username: string, password: string): Promise<AuthResponse> => {

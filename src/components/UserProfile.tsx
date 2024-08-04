@@ -3,13 +3,9 @@ import React from 'react';
 import { Avatar, Box, SkeletonCircle, SkeletonText, Text, VStack } from '@chakra-ui/react';
 
 import { useUserQuery } from '../hooks/useUserQuery';
+import { UserBase } from '../types/user';
 
-interface UserProfileProps {
-    username: string;
-    avatar?: string;
-    email: string;
-    bio?: string;
-}
+interface UserProfileProps extends UserBase { }
 
 const UserProfileComponent: React.FC<UserProfileProps> = ({ username, avatar, email, bio }) => (
     <Box>
@@ -22,8 +18,12 @@ const UserProfileComponent: React.FC<UserProfileProps> = ({ username, avatar, em
     </Box>
 );
 
-export const UserProfile = React.memo(() => {
-    const { data, error, isError, isLoading } = useUserQuery();
+interface UserProfileContainerProps {
+    userId?: string;
+}
+
+export const UserProfile: React.FC<UserProfileContainerProps> = ({ userId }) => {
+    const { data, error, isError, isLoading } = useUserQuery(userId ? { userId } : undefined);
 
     if (isLoading) {
         return (
@@ -40,12 +40,5 @@ export const UserProfile = React.memo(() => {
 
     if (!data) return null;
 
-    return (
-        <UserProfileComponent
-            username={data.username}
-            avatar={data.avatar}
-            email={data.email}
-            bio={data.bio}
-        />
-    );
-});
+    return <UserProfileComponent {...data} />;
+};

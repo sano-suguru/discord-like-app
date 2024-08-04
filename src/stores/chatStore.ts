@@ -8,6 +8,7 @@ interface ChatState {
     messages: { [channelId: string]: Message[] };
     currentChannel: string | null;
     webSocket: MockWebSocket | null;
+    mentionNotifications: { [username: string]: number };
     addMessage: (channelId: string, message: Message) => void;
     editMessage: (channelId: string, messageId: string, newContent: string) => void;
     deleteMessage: (channelId: string, messageId: string) => void;
@@ -15,13 +16,16 @@ interface ChatState {
     sendMessage: (content: string, username: string, attachment?: FileAttachment) => void;
     addReaction: (channelId: string, messageId: string, emoji: string, username: string) => void;
     removeReaction: (channelId: string, messageId: string, emoji: string, username: string) => void;
-
+    addMentionNotification: (username: string) => void;
+    clearMentionNotifications: (username: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
     messages: {},
     currentChannel: null,
     webSocket: null,
+    mentionNotifications: {},
+
     addMessage: (channelId, message) =>
         set(state => ({
             messages: {
@@ -29,6 +33,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 [channelId]: [...(state.messages[channelId] || []), message],
             },
         })),
+
     editMessage: (channelId, messageId, newContent) =>
         set(state => ({
             messages: {
@@ -40,6 +45,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 ),
             },
         })),
+
     deleteMessage: (channelId, messageId) =>
         set(state => ({
             messages: {
@@ -47,6 +53,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 [channelId]: state.messages[channelId].filter(msg => msg.id !== messageId),
             },
         })),
+
     setCurrentChannel: (channelId) => {
         if (!channelId) {
             console.error('Attempted to set undefined channel');
@@ -78,24 +85,38 @@ export const useChatStore = create<ChatState>((set, get) => ({
             }
         });
 
-        console.log(`Switched to channel: ${channelId}`); // デバッグ用
+        console.log(`Switched to channel: ${channelId}`);
     },
+
     sendMessage: (content, username, attachment) => {
-        const { currentChannel, webSocket } = get();
+        const { currentChannel, webSocket, addMessage, addMentionNotification } = get();
         if (currentChannel && webSocket) {
             webSocket.sendMessage(content);
-            get().addMessage(currentChannel, {
+            const newMessage: Message = {
                 id: Date.now().toString(),
                 username: username,
                 content,
                 timestamp: new Date(),
                 attachment,
                 reactions: {}
-            });
+            };
+            addMessage(currentChannel, newMessage);
+
+            // メンション通知の処理
+            const mentionedUsers = content.match(/@(\w+)/g);
+            if (mentionedUsers) {
+                mentionedUsers.forEach((mention) => {
+                    const mentionedUser = mention.slice(1);
+                    if (mentionedUser !== username) {
+                        addMentionNotification(mentionedUser);
+                    }
+                });
+            }
         } else {
             console.error('Cannot send message: No active channel or WebSocket connection');
         }
     },
+
     addReaction: (channelId, messageId, emoji, username) =>
         set((state) => {
             const updatedMessages = state.messages[channelId].map((msg) => {
@@ -152,4 +173,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
                 },
             };
         }),
+
+    addMentionNotification: (username) => set((state) => ({
+        mentionNotifications: {
+            ...state.mentionNotifications,
+            [username]: (state.mentionNotifications[username] || 0) + 1,
+        },
+    })),
+
+    clearMentionNotifications: (username) => set((state) => ({
+        mentionNotifications: {
+            ...state.mentionNotifications,
+            [username]: 0,
+        },
+    })),
 }));
