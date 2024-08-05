@@ -39,8 +39,10 @@ export const MessageItem: React.FC<MessageItemProps> = React.memo(({
 
     const messageColor = isOwnMessage ? 'blue' : 'gray';
 
+    const reactionEntries = useMemo(() => Object.entries(message.reactions || {}), [message.reactions]);
+
     const reactionButtons = useMemo(() => (
-        Object.entries(message.reactions || {}).map(([emoji, reaction]) => (
+        reactionEntries.map(([emoji, reaction]) => (
             <Button
                 key={emoji}
                 size="xs"
@@ -50,20 +52,16 @@ export const MessageItem: React.FC<MessageItemProps> = React.memo(({
                 {emoji} {reaction.count}
             </Button>
         ))
-    ), [message.reactions, currentUsername, handleReaction]);
+    ), [reactionEntries, currentUsername, handleReaction]);
 
     const renderContent = useMemo(() => {
-        const words = message.content.split(' ');
-        return words.map((word, index) => {
-            if (word.startsWith('@')) {
-                return (
-                    <Text as="span" key={index} fontWeight="bold" color="blue.500">
-                        {word}{' '}
-                    </Text>
-                );
-            }
-            return word + ' ';
-        });
+        return message.content.split(' ').map((word, index) => (
+            word.startsWith('@') ? (
+                <Text as="span" key={index} fontWeight="bold" color="blue.500">
+                    {word}{' '}
+                </Text>
+            ) : `${word} `
+        ));
     }, [message.content]);
 
     return (

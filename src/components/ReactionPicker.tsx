@@ -1,15 +1,14 @@
 import React, { useCallback, useMemo } from 'react';
-
 import { Button, Popover, PopoverContent, PopoverTrigger, SimpleGrid } from '@chakra-ui/react';
 
 const emojis = ['👍', '❤️', '😄', '😮', '😢', '😡'] as const;
 
 interface ReactionPickerProps {
-    onSelectEmoji: (emoji: string) => void;
+    onSelectEmoji: (emoji: typeof emojis[number]) => void;
 }
 
 export const ReactionPicker: React.FC<ReactionPickerProps> = React.memo(({ onSelectEmoji }) => {
-    const handleEmojiSelect = useCallback((emoji: string) => {
+    const handleEmojiSelect = useCallback((emoji: typeof emojis[number]) => {
         onSelectEmoji(emoji);
     }, [onSelectEmoji]);
 
@@ -18,6 +17,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = React.memo(({ onSel
             <Button
                 key={emoji}
                 onClick={() => handleEmojiSelect(emoji)}
+                aria-label={`React with ${emoji}`}
             >
                 {emoji}
             </Button>
@@ -27,7 +27,7 @@ export const ReactionPicker: React.FC<ReactionPickerProps> = React.memo(({ onSel
     return (
         <Popover>
             <PopoverTrigger>
-                <Button size="sm">
+                <Button size="sm" aria-label="Open reaction picker">
                     Add Reaction
                 </Button>
             </PopoverTrigger>
