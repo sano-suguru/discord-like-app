@@ -1,11 +1,10 @@
 import React, { useRef, useState } from 'react';
-
-import { Button, HStack, Input } from '@chakra-ui/react';
-
+import { Button, HStack, Textarea } from '@chakra-ui/react';
 import { FileAttachment } from '../types/fileAttachment';
 import { ChatParticipant } from '../types/user';
 import { FileUploadButton } from './FileUploadButton';
 import { MentionSuggestions } from './MentionSuggestions';
+import { useAutoResizeTextArea } from '../hooks/useAutoResizeTextArea';
 
 interface MessageInputProps {
     onSend: (content: string, attachment?: FileAttachment) => void;
@@ -17,9 +16,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSend, onFileSelect
     const [content, setContent] = useState('');
     const [attachment, setAttachment] = useState<FileAttachment | null>(null);
     const [mentionSearch, setMentionSearch] = useState<string | null>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    useAutoResizeTextArea(inputRef, content);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
         setContent(value);
 
@@ -63,16 +64,35 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSend, onFileSelect
     );
 
     return (
-        <HStack position="relative">
-            <Input
+        <HStack position="relative" alignItems="flex-end">
+            <Textarea
                 ref={inputRef}
                 value={content}
                 onChange={handleInputChange}
                 placeholder="Type a message..."
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        handleSend();
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!e.nativeEvent.isComposing) {
+                            handleSend();
+                        }
                     }
+                }}
+                minH="40px"
+                maxH="200px"
+                overflow="auto"
+                resize="none"
+                transition="height 0.2s"
+                sx={{
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                        borderRadius: '8px',
+                        backgroundColor: `rgba(0, 0, 0, 0.05)`,
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: `rgba(0, 0, 0, 0.15)`,
+                        borderRadius: '8px',
+                    },
                 }}
             />
             {mentionSearch !== null && (
